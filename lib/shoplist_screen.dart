@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:shoplist/types.dart';
 import 'shoplist_model.dart';
 
 // class Wrap {
@@ -95,15 +96,12 @@ class _ShopListState extends State<ShopListScreen> {
       body: Center(
           child: ListView(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text('You have ${items.length} items:'),
-          ),
           for (var item in items)
-            ListTile(
-              leading: const Icon(Icons.favorite),
-              title: Text(item.title),
-            ),
+            ShopListItem(
+                item: item,
+                onCheckedChanged: (val) {
+                  model.checkItem(item, val);
+                }),
         ],
       )),
       floatingActionButton: FloatingActionButton(
@@ -114,5 +112,31 @@ class _ShopListState extends State<ShopListScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+}
+
+class ShopListItem extends StatelessWidget {
+  const ShopListItem({
+    super.key,
+    required this.item,
+    required this.onCheckedChanged,
+  });
+
+  final Item item;
+  final ValueChanged<bool?> onCheckedChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+        title: Text(
+          item.title,
+          style: TextStyle(
+            decoration: item.checked ? TextDecoration.lineThrough : TextDecoration.none,
+          ),
+        ),
+        value: item.checked,
+        onChanged: (val) {
+          onCheckedChanged(val);
+        });
   }
 }
