@@ -2,9 +2,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'shoplist_screen.dart';
-import 'additem_screen.dart';
+import 'add_screen.dart';
 import 'store.dart';
-import 'types.dart';
+import 'item_model.dart';
 
 // YA_DISK_DEV_TOKEN
 

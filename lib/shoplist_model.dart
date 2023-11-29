@@ -1,30 +1,39 @@
 import 'dart:developer';
-import 'types.dart';
+import 'item_model.dart';
 import 'store.dart';
 import 'subscription/subscribable.dart';
 
 class ShopListModel extends Subscribable {
   Function? onChanged;
 
-  int _counter = 0;
+  String name = "develop";
   final Store _store = Store.instance;
   List<Item> _items = [];
 
   ShopListModel({
     this.onChanged,
   }) {
-    log("ctor: ShopListModel");
+    _store.newList(name);
   }
 
   void init() {
-    _store.loadItems().then((list) {
+    _store.loadItems(name).then((list) {
       _items = list;
       _resort();
       onChanged!();
     });
 
     _store.itemAdded.onReceive(this, (v) {
-      _items.add(v);
+      Item item = v;
+      item.checked = false;
+      _items.add(item);
+      _resort();
+      onChanged!();
+    });
+
+    _store.itemRemoved.onReceive(this, (v) {
+      log("removed: ${v.title}");
+      _items.removeWhere((e) => e.title == v.title);
       _resort();
       onChanged!();
     });
@@ -45,12 +54,6 @@ class ShopListModel extends Subscribable {
 
   List<Item> items() {
     return _items;
-  }
-
-  void addNew() {
-    _counter++;
-    _items.add(Item(title: "item $_counter"));
-    onChanged!();
   }
 
   void checkItem(item, val) {

@@ -1,7 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:shoplist/types.dart';
+import 'item_model.dart';
 import 'shoplist_model.dart';
+import 'shoplist_item.dart';
 
 // class Wrap {
 //   StatelessElement? element;
@@ -86,7 +87,6 @@ class _ShopListState extends State<ShopListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    log("build");
     var items = model.items();
 
     return Scaffold(
@@ -112,31 +112,5 @@ class _ShopListState extends State<ShopListScreen> {
         child: const Icon(Icons.add),
       ),
     );
-  }
-}
-
-class ShopListItem extends StatelessWidget {
-  const ShopListItem({
-    super.key,
-    required this.item,
-    required this.onCheckedChanged,
-  });
-
-  final Item item;
-  final ValueChanged<bool?> onCheckedChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return CheckboxListTile(
-        title: Text(
-          item.title,
-          style: TextStyle(
-            decoration: item.checked ? TextDecoration.lineThrough : TextDecoration.none,
-          ),
-        ),
-        value: item.checked,
-        onChanged: (val) {
-          onCheckedChanged(val);
-        });
   }
 }
