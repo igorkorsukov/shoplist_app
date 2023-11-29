@@ -12,9 +12,7 @@ class ShopListModel extends Subscribable {
 
   ShopListModel({
     this.onChanged,
-  }) {
-    _store.newList(name);
-  }
+  });
 
   void init() {
     _store.loadItems(name).then((list) {

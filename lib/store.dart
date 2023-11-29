@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
 import 'item_model.dart';
@@ -9,6 +10,8 @@ class Store {
   late final _ydfs = YandexDiskFS('https://cloud-api.yandex.net', _token);
   final Channel<Item> _itemAdded = Channel<Item>();
   final Channel<Item> _itemRemoved = Channel<Item>();
+
+  final Map<String, List<Item>> _cache = {};
 
   Store._internal();
 
@@ -24,25 +27,52 @@ class Store {
     }
   }
 
-  Future<void> newList(name) async {
-    try {
-      await _ydfs.makeDir('app:/shoplist/$name');
-    } catch (e) {
-      log("catch: $e");
+  List<Item> _deserialize(List<int> bytes) {
+    var str = utf8.decode(bytes);
+    var obj = json.decode(str) as Map;
+    var list = obj["items"] as List;
+
+    var items = <Item>[];
+    for (var it in list) {
+      var itObj = it as Map;
+      var item = Item();
+      item.title = itObj["title"];
+      items.add(item);
     }
+
+    return items;
+  }
+
+  List<int> _serialize(List<Item> items) {
+    var list = <Map<String, dynamic>>[];
+    for (var it in items) {
+      Map<String, dynamic> itObj = {
+        'title': it.title,
+      };
+      list.add(itObj);
+    }
+
+    Map<String, dynamic> obj = {'items': list};
+
+    var str = json.encode(obj);
+    return utf8.encode(str);
   }
 
   Future<List<Item>> loadItems(name) async {
     try {
-      List<String> files = await _ydfs.scanFiles('app:/shoplist/$name');
-
-      var items = <Item>[];
-      for (var file in files) {
-        var item = Item();
-        item.title = file;
-        items.add(item);
+      List<Item> items = _cache[name] ?? [];
+      if (items.isNotEmpty) {
+        return items;
       }
 
+      bool exists = await _ydfs.exists('app:/shoplist/$name.json');
+      if (!exists) {
+        return items;
+      }
+
+      var data = await _ydfs.readFile('app:/shoplist/$name.json');
+      items = _deserialize(data);
+      _cache[name] = items;
       return items;
     } catch (e) {
       log("catch: $e");
@@ -50,9 +80,24 @@ class Store {
     }
   }
 
+  Future<void> _writeItems(String name, List<Item> items) async {
+    try {
+      var data = _serialize(items);
+      await _ydfs.remove('app:/shoplist/$name.json');
+      _ydfs.writeFile('app:/shoplist/$name.json', data);
+    } catch (e) {
+      log("catch: $e");
+    }
+  }
+
   Future<void> addItem(String name, Item item) async {
     try {
-      await _ydfs.writeFile('app:/shoplist/$name/${item.title}', '{}');
+      List<Item> items = _cache[name] ?? [];
+      items.add(item);
+      _cache[name] = items;
+
+      _writeItems(name, items);
+
       _itemAdded.send(item);
     } catch (e) {
       log("catch: $e");
@@ -61,7 +106,12 @@ class Store {
 
   Future<void> removeItem(String name, Item item) async {
     try {
-      await _ydfs.remove('app:/shoplist/$name/${item.title}');
+      List<Item> items = _cache[name] ?? [];
+      items.removeWhere((e) => e.title == item.title);
+      _cache[name] = items;
+
+      _writeItems(name, items);
+
       _itemRemoved.send(item);
     } catch (e) {
       log("catch: $e");

@@ -1,5 +1,6 @@
 class Item {
   String title = "";
   bool checked = false;
-  Item({this.title = ""});
+  bool isNew = false;
+  Item({this.title = "", this.checked = false, this.isNew = false});
 }
