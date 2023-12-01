@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:convert';
+import 'dart:collection';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
 import 'item_model.dart';
@@ -8,16 +9,16 @@ import 'subscription/channel.dart';
 class Store {
   final _token = dotenv.env['YA_DISK_DEV_TOKEN'] ?? '';
   late final _ydfs = YandexDiskFS('https://cloud-api.yandex.net', _token);
-  final Channel<Item> _itemAdded = Channel<Item>();
-  final Channel<Item> _itemRemoved = Channel<Item>();
+  final Channel<(String name, Item item)> _itemAdded = Channel<(String name, Item item)>();
+  final Channel<(String name, Item item)> _itemRemoved = Channel<(String name, Item item)>();
 
   final Map<String, List<Item>> _cache = {};
 
   Store._internal();
 
   static final Store instance = Store._internal();
-  Channel<Item> get itemAdded => _itemAdded;
-  Channel<Item> get itemRemoved => _itemRemoved;
+  Channel<(String, Item)> get itemAdded => _itemAdded;
+  Channel<(String, Item)> get itemRemoved => _itemRemoved;
 
   void init() async {
     try {
@@ -58,22 +59,22 @@ class Store {
     return utf8.encode(str);
   }
 
-  Future<List<Item>> loadItems(name) async {
+  Future<UnmodifiableListView<Item>> loadItems(name) async {
     try {
       List<Item> items = _cache[name] ?? [];
       if (items.isNotEmpty) {
-        return items;
+        return UnmodifiableListView(items);
       }
 
       bool exists = await _ydfs.exists('app:/shoplist/$name.json');
       if (!exists) {
-        return items;
+        return UnmodifiableListView(items);
       }
 
       var data = await _ydfs.readFile('app:/shoplist/$name.json');
       items = _deserialize(data);
       _cache[name] = items;
-      return items;
+      return UnmodifiableListView(items);
     } catch (e) {
       log("catch: $e");
       rethrow;
@@ -98,7 +99,7 @@ class Store {
 
       _writeItems(name, items);
 
-      _itemAdded.send(item);
+      _itemAdded.send((name, item));
     } catch (e) {
       log("catch: $e");
     }
@@ -112,7 +113,7 @@ class Store {
 
       _writeItems(name, items);
 
-      _itemRemoved.send(item);
+      _itemRemoved.send((name, item));
     } catch (e) {
       log("catch: $e");
     }

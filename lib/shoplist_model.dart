@@ -16,22 +16,29 @@ class ShopListModel extends Subscribable {
 
   void init() {
     _store.loadItems(name).then((list) {
-      _items = list;
+      _items = List.of(list);
       _resort();
       onChanged!();
     });
 
-    _store.itemAdded.onReceive(this, (v) {
-      Item item = v;
+    _store.itemAdded.onReceive(this, (p) {
+      if (name != p.$1) {
+        return;
+      }
+      log("added: ${p.$2.title}");
+      Item item = p.$2.clone();
       item.checked = false;
       _items.add(item);
       _resort();
       onChanged!();
     });
 
-    _store.itemRemoved.onReceive(this, (v) {
-      log("removed: ${v.title}");
-      _items.removeWhere((e) => e.title == v.title);
+    _store.itemRemoved.onReceive(this, (p) {
+      if (name != p.$1) {
+        return;
+      }
+      log("removed: ${p.$2.title}");
+      _items.removeWhere((e) => e.title == p.$2.title);
       _resort();
       onChanged!();
     });

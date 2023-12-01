@@ -10,47 +10,54 @@ class AddItemScreen extends StatefulWidget {
 }
 
 class _AddItemScreen extends State<AddItemScreen> {
-  final model = EditItemModel();
+  final _model = EditItemModel();
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    model.onChanged = () {
+    _model.onChanged = () {
       setState(() {});
     };
-    model.init();
+
+    _searchController.addListener(() {
+      _model.search(_searchController.text);
+    });
+
+    _model.init();
   }
 
   @override
   Widget build(BuildContext context) {
-    var items = model.items();
+    var items = _model.items();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add item'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            TextField(
-              decoration: const InputDecoration(),
-              onChanged: (val) => model.search(val),
+        backgroundColor: Theme.of(context).primaryColor,
+        title: TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            filled: true,
+            isDense: true,
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () => _searchController.clear(),
             ),
-            Expanded(
-              child: ListView(
-                children: [
-                  for (var item in items)
-                    AddItem(
-                        item: item,
-                        onCheckedChanged: (val) {
-                          model.changeItem(item, val);
-                        }),
-                ],
-              ),
-            ),
-          ],
+            border: const OutlineInputBorder(
+                //borderRadius: BorderRadius.circular(20.0),
+                ),
+          ),
         ),
+      ),
+      body: ListView(
+        children: [
+          for (var item in items)
+            AddItem(
+                item: item,
+                onCheckedChanged: (val) {
+                  _model.changeItem(item, val);
+                }),
+        ],
       ),
     );
   }

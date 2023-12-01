@@ -14,7 +14,7 @@ class EditItemModel {
   String _searchString = "";
 
   void init() async {
-    _reference = await _store.loadItems(referenceName);
+    _reference = List.of(await _store.loadItems(referenceName));
     _sortByTitle(_reference);
 
     var list = await _store.loadItems(editListName);
@@ -38,17 +38,26 @@ class EditItemModel {
   void _update() {
     _filtered.clear();
 
-    if (_searchString.isNotEmpty) {
-      _filtered.add(Item(title: _searchString, isNew: true));
-    }
-
+    bool needAddNew = true;
     for (var i in _reference) {
       i.checked = _current.contains(i.title);
       if (_searchString.isEmpty) {
         _filtered.add(i);
-      } else if (i.title.toLowerCase().contains(_searchString.toLowerCase())) {
-        _filtered.add(i);
+      } else {
+        var t = i.title.toLowerCase();
+        var s = _searchString.toLowerCase();
+        if (t.contains(s)) {
+          _filtered.add(i);
+        }
+
+        if (t == s) {
+          needAddNew = false;
+        }
       }
+    }
+
+    if (_searchString.isNotEmpty && needAddNew) {
+      _filtered.add(Item(title: _searchString, isNew: true));
     }
 
     onChanged!();
