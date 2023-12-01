@@ -14,7 +14,9 @@ class ShopListModel extends Subscribable {
     this.onChanged,
   });
 
-  void init() {
+  void init() async {
+    await _store.init();
+
     _store.loadItems(name).then((list) {
       _items = List.of(list);
       _resort();

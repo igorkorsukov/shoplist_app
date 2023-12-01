@@ -1,18 +1,17 @@
 import 'dart:developer';
 import 'dart:convert';
 import 'dart:collection';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'item_model.dart';
 import 'subscription/channel.dart';
 
 class Store {
-  final _token = dotenv.env['YA_DISK_DEV_TOKEN'] ?? '';
-  late final _ydfs = YandexDiskFS('https://cloud-api.yandex.net', _token);
   final Channel<(String name, Item item)> _itemAdded = Channel<(String name, Item item)>();
   final Channel<(String name, Item item)> _itemRemoved = Channel<(String name, Item item)>();
 
+  bool _inited = false;
   final Map<String, List<Item>> _cache = {};
+  late SharedPreferences _prefs;
 
   Store._internal();
 
@@ -20,17 +19,17 @@ class Store {
   Channel<(String, Item)> get itemAdded => _itemAdded;
   Channel<(String, Item)> get itemRemoved => _itemRemoved;
 
-  void init() async {
-    try {
-      await _ydfs.makeDir('app:/shoplist');
-    } catch (e) {
-      log("catch: $e");
+  Future<void> init() async {
+    if (_inited) {
+      return;
     }
+
+    _prefs = await SharedPreferences.getInstance();
+    _inited = true;
   }
 
-  List<Item> _deserialize(List<int> bytes) {
-    var str = utf8.decode(bytes);
-    var obj = json.decode(str) as Map;
+  List<Item> _deserialize(String jsn) {
+    var obj = json.decode(jsn) as Map;
     var list = obj["items"] as List;
 
     var items = <Item>[];
@@ -44,7 +43,7 @@ class Store {
     return items;
   }
 
-  List<int> _serialize(List<Item> items) {
+  String _serialize(List<Item> items) {
     var list = <Map<String, dynamic>>[];
     for (var it in items) {
       Map<String, dynamic> itObj = {
@@ -55,8 +54,7 @@ class Store {
 
     Map<String, dynamic> obj = {'items': list};
 
-    var str = json.encode(obj);
-    return utf8.encode(str);
+    return json.encode(obj);
   }
 
   Future<UnmodifiableListView<Item>> loadItems(name) async {
@@ -66,13 +64,12 @@ class Store {
         return UnmodifiableListView(items);
       }
 
-      bool exists = await _ydfs.exists('app:/shoplist/$name.json');
-      if (!exists) {
+      String jsn = _prefs.getString(name) ?? "";
+      if (jsn.isEmpty) {
         return UnmodifiableListView(items);
       }
 
-      var data = await _ydfs.readFile('app:/shoplist/$name.json');
-      items = _deserialize(data);
+      items = _deserialize(jsn);
       _cache[name] = items;
       return UnmodifiableListView(items);
     } catch (e) {
@@ -83,9 +80,8 @@ class Store {
 
   Future<void> _writeItems(String name, List<Item> items) async {
     try {
-      var data = _serialize(items);
-      await _ydfs.remove('app:/shoplist/$name.json');
-      _ydfs.writeFile('app:/shoplist/$name.json', data);
+      var jsn = _serialize(items);
+      _prefs.setString(name, jsn);
     } catch (e) {
       log("catch: $e");
     }
