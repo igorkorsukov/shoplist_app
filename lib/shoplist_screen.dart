@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'item_model.dart';
 import 'shoplist_model.dart';
 import 'shoplist_item.dart';
+import 'sync_model.dart';
 
 // class Wrap {
 //   StatelessElement? element;
@@ -68,6 +69,7 @@ class ShopListScreen extends StatefulWidget {
 
 class _ShopListState extends State<ShopListScreen> {
   final model = ShopListModel();
+  final syncModel = SyncModel();
 
   @override
   void initState() {
@@ -77,6 +79,8 @@ class _ShopListState extends State<ShopListScreen> {
       setState(() {});
     };
     model.init();
+
+    syncModel.init();
   }
 
   @override

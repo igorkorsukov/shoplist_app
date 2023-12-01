@@ -57,6 +57,10 @@ class Store {
     return json.encode(obj);
   }
 
+  String loadItemsJson(String name) {
+    return _prefs.getString(name) ?? "";
+  }
+
   Future<UnmodifiableListView<Item>> loadItems(name) async {
     try {
       List<Item> items = _cache[name] ?? [];
@@ -64,7 +68,7 @@ class Store {
         return UnmodifiableListView(items);
       }
 
-      String jsn = _prefs.getString(name) ?? "";
+      String jsn = loadItemsJson(name);
       if (jsn.isEmpty) {
         return UnmodifiableListView(items);
       }
