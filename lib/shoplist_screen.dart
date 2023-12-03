@@ -1,9 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'item_model.dart';
 import 'shoplist_model.dart';
 import 'shoplist_item.dart';
-import 'sync_model.dart';
+import 'sync_button.dart';
 
 // class Wrap {
 //   StatelessElement? element;
@@ -69,7 +68,6 @@ class ShopListScreen extends StatefulWidget {
 
 class _ShopListState extends State<ShopListScreen> {
   final model = ShopListModel();
-  final syncModel = SyncModel();
 
   @override
   void initState() {
@@ -79,8 +77,6 @@ class _ShopListState extends State<ShopListScreen> {
       setState(() {});
     };
     model.init();
-
-    syncModel.init();
   }
 
   @override
@@ -96,6 +92,7 @@ class _ShopListState extends State<ShopListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shoplist'),
+        actions: [SyncButton()],
       ),
       body: Center(
           child: ListView(

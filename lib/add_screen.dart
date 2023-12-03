@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_model.dart';
 import 'add_item.dart';
+import 'sync_button.dart';
 
 class AddItemScreen extends StatefulWidget {
   const AddItemScreen({super.key});
@@ -48,6 +49,7 @@ class _AddItemScreen extends State<AddItemScreen> {
                 ),
           ),
         ),
+        actions: [SyncButton()],
       ),
       body: ListView(
         children: [

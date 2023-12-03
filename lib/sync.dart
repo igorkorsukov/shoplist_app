@@ -4,11 +4,17 @@ import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
 import 'subscription/subscribable.dart';
+import 'subscription/channel.dart';
 import 'store.dart';
+
+enum SyncStatus { notsynced, running, synced }
 
 class Sync extends Subscribable {
   final String referenceName = "reference";
   final String editListName = "develop";
+
+  SyncStatus status = SyncStatus.notsynced;
+  final statusChanged = Channel<SyncStatus>();
 
   bool _inited = false;
   final _token = dotenv.env['YA_DISK_DEV_TOKEN'] ?? '';
@@ -28,12 +34,16 @@ class Sync extends Subscribable {
       return;
     }
 
+    _inited = true;
+
     _store.itemAdded.onReceive(this, (v) {
       _needSync += 1;
+      _setStatus(SyncStatus.notsynced);
     });
 
     _store.itemRemoved.onReceive(this, (v) {
       _needSync += 1;
+      _setStatus(SyncStatus.notsynced);
     });
 
     try {
@@ -41,12 +51,22 @@ class Sync extends Subscribable {
     } catch (e) {
       log("catch: $e");
     }
+  }
 
-    _inited = true;
+  void _setStatus(SyncStatus s) {
+    status = s;
+    statusChanged.send(s);
   }
 
   void startSync() async {
+    if (status == SyncStatus.running) {
+      return;
+    }
+
+    _timer?.cancel();
+
     await sync();
+
     _timer = Timer(_interval, startSync);
   }
 
@@ -61,6 +81,8 @@ class Sync extends Subscribable {
       return;
     }
 
+    _setStatus(SyncStatus.running);
+
     try {
       List<String> names = [referenceName, editListName];
       for (var name in names) {
@@ -70,8 +92,10 @@ class Sync extends Subscribable {
       }
 
       _synced = _needSync;
+      _setStatus(SyncStatus.synced);
     } catch (e) {
       log("catch: $e");
+      _setStatus(SyncStatus.notsynced);
     }
 
     log("sync finished");

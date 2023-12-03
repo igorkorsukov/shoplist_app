@@ -1,10 +1,28 @@
 import 'sync.dart';
+import 'subscription/subscribable.dart';
 
-class SyncModel {
+class SyncModel extends Subscribable {
+  Function(SyncStatus)? onStatusChanged;
+
   final Sync _sync = Sync.instance;
 
+  SyncModel({
+    this.onStatusChanged,
+  });
+
   void init() async {
-    await _sync.init();
+    _sync.statusChanged.onReceive(this, (v) {
+      onStatusChanged!(v);
+    });
+  }
+
+  void deinit() {
+    unsubscribe();
+  }
+
+  SyncStatus status() => _sync.status;
+
+  void startSync() {
     _sync.startSync();
   }
 }
