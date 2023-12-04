@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
+import 'package:shoplist/item_model.dart';
 import 'subscription/subscribable.dart';
 import 'subscription/channel.dart';
 import 'store.dart';
@@ -49,7 +50,7 @@ class Sync extends Subscribable {
     try {
       await _ydfs.makeDir('app:/shoplist');
     } catch (e) {
-      log("catch: $e");
+      log("[Sync] init: $e");
     }
   }
 
@@ -75,29 +76,55 @@ class Sync extends Subscribable {
   }
 
   Future<void> sync() async {
-    log("try sync...");
+    log("[Sync] try sync...");
     if (_needSync == _synced) {
-      log("no need sync");
+      log("[Sync] no need sync");
       return;
     }
 
     _setStatus(SyncStatus.running);
 
+    List<String> names = [referenceName, editListName];
+
     try {
-      List<String> names = [referenceName, editListName];
       for (var name in names) {
-        var jsn = _store.loadItemsJson(name);
-        var data = utf8.encode(jsn);
-        await _ydfs.writeFile('app:/shoplist/$name.json', data, overwrite: true);
+        // get remote list
+        ShopList remoteList = ShopList();
+        var bytes = await _ydfs.readFile('app:/shoplist/$name.json', maybeNotExists: true);
+        if (bytes.isNotEmpty) {
+          var str = utf8.decode(bytes);
+          var jsn = json.decode(str);
+          remoteList = ShopList.fromJson(jsn);
+        }
+
+        // get local
+        ShopList localList = await _store.loadShopList(name);
+
+        // merge
+        ShopList mergedList = _merge(remoteList, localList);
+
+        // write merged list
+        {
+          var jsn = mergedList.toJson();
+          var str = json.encode(jsn);
+          bytes = utf8.encode(str);
+          await _ydfs.writeFile('app:/shoplist/$name.json', bytes, overwrite: true);
+        }
       }
 
       _synced = _needSync;
       _setStatus(SyncStatus.synced);
     } catch (e) {
-      log("catch: $e");
+      log("[Sync] sync: $e");
       _setStatus(SyncStatus.notsynced);
     }
 
-    log("sync finished");
+    log("[Sync] sync finished");
+  }
+
+  ShopList _merge(ShopList remoteList, ShopList localList) {
+    //! TODO
+    ShopList list = localList.clone();
+    return list;
   }
 }

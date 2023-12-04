@@ -1,23 +1,22 @@
 import 'dart:developer';
 import 'dart:convert';
-import 'dart:collection';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'item_model.dart';
 import 'subscription/channel.dart';
 
 class Store {
-  final Channel<(String name, Item item)> _itemAdded = Channel<(String name, Item item)>();
-  final Channel<(String name, Item item)> _itemRemoved = Channel<(String name, Item item)>();
+  final Channel<(String name, ShopItem item)> _itemAdded = Channel<(String name, ShopItem item)>();
+  final Channel<(String name, ShopItem item)> _itemRemoved = Channel<(String name, ShopItem item)>();
 
   bool _inited = false;
-  final Map<String, List<Item>> _cache = {};
+  final Map<String, ShopList> _cache = {};
   late SharedPreferences _prefs;
 
   Store._internal();
 
   static final Store instance = Store._internal();
-  Channel<(String, Item)> get itemAdded => _itemAdded;
-  Channel<(String, Item)> get itemRemoved => _itemRemoved;
+  Channel<(String, ShopItem)> get itemAdded => _itemAdded;
+  Channel<(String, ShopItem)> get itemRemoved => _itemRemoved;
 
   Future<void> init() async {
     if (_inited) {
@@ -25,97 +24,62 @@ class Store {
     }
 
     _prefs = await SharedPreferences.getInstance();
+    //_prefs.clear();
     _inited = true;
   }
 
-  List<Item> _deserialize(String jsn) {
-    var obj = json.decode(jsn) as Map;
-    var list = obj["items"] as List;
-
-    var items = <Item>[];
-    for (var it in list) {
-      var itObj = it as Map;
-      var item = Item();
-      item.title = itObj["title"];
-      items.add(item);
-    }
-
-    return items;
-  }
-
-  String _serialize(List<Item> items) {
-    var list = <Map<String, dynamic>>[];
-    for (var it in items) {
-      Map<String, dynamic> itObj = {
-        'title': it.title,
-      };
-      list.add(itObj);
-    }
-
-    Map<String, dynamic> obj = {'items': list};
-
-    return json.encode(obj);
-  }
-
-  String loadItemsJson(String name) {
-    return _prefs.getString(name) ?? "";
-  }
-
-  Future<UnmodifiableListView<Item>> loadItems(name) async {
+  Future<ShopList> loadShopList(name) async {
     try {
-      List<Item> items = _cache[name] ?? [];
-      if (items.isNotEmpty) {
-        return UnmodifiableListView(items);
+      ShopList list = _cache[name] ?? ShopList();
+      if (list.items.isNotEmpty) {
+        return list;
       }
 
-      String jsn = loadItemsJson(name);
-      if (jsn.isEmpty) {
-        return UnmodifiableListView(items);
+      String jsnStr = _prefs.getString(name) ?? "";
+      if (jsnStr.isEmpty) {
+        return list;
       }
 
-      items = _deserialize(jsn);
-      _cache[name] = items;
-      return UnmodifiableListView(items);
+      list = ShopList.fromJson(json.decode(jsnStr) as Map<String, dynamic>);
+      _cache[name] = list;
+
+      return list;
     } catch (e) {
-      log("catch: $e");
-      rethrow;
+      log("[Store] loadShopList: $e");
+      return ShopList();
     }
   }
 
-  Future<void> _writeItems(String name, List<Item> items) async {
-    try {
-      var jsn = _serialize(items);
-      _prefs.setString(name, jsn);
-    } catch (e) {
-      log("catch: $e");
-    }
+  Future<void> _writeItems(String name, ShopList list) async {
+    var jsn = list.toJson();
+    _prefs.setString(name, json.encode(jsn));
   }
 
-  Future<void> addItem(String name, Item item) async {
+  Future<void> addItem(String name, ShopItem item) async {
     try {
-      List<Item> items = _cache[name] ?? [];
-      items.add(item);
-      _cache[name] = items;
+      ShopList list = _cache[name] ?? ShopList();
+      list.items.add(item);
+      _cache[name] = list;
 
-      _writeItems(name, items);
+      _writeItems(name, list);
 
       _itemAdded.send((name, item));
     } catch (e) {
-      log("catch: $e");
+      log("[Store] addItem: $e");
     }
   }
 
-  Future<void> removeItem(String name, Item item) async {
+  Future<void> removeItem(String name, ShopItem item) async {
     try {
-      List<Item> items = _cache[name] ?? [];
-      items.removeWhere((e) => e.title == item.title);
-      _cache[name] = items;
+      ShopList list = _cache[name] ?? ShopList();
+      list.items.removeWhere((e) => e.title == item.title);
+      _cache[name] = list;
 
-      _writeItems(name, items);
+      _writeItems(name, list);
 
       _itemRemoved.send((name, item));
     } catch (e) {
-      log("catch: $e");
+      log("[Store] removeItem: $e");
     }
   }
 }

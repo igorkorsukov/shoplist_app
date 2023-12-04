@@ -8,7 +8,7 @@ class AddItem extends StatelessWidget {
     required this.onCheckedChanged,
   });
 
-  final Item item;
+  final ShopItem item;
   final ValueChanged<bool?> onCheckedChanged;
 
   @override

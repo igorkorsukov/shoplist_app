@@ -5,10 +5,10 @@ import 'subscription/subscribable.dart';
 
 class ShopListModel extends Subscribable {
   Function? onChanged;
-
   String name = "develop";
+
   final Store _store = Store.instance;
-  List<Item> _items = [];
+  ShopList _list = ShopList();
 
   ShopListModel({
     this.onChanged,
@@ -17,8 +17,8 @@ class ShopListModel extends Subscribable {
   void init() async {
     await _store.init();
 
-    _store.loadItems(name).then((list) {
-      _items = List.of(list);
+    _store.loadShopList(name).then((list) {
+      _list = list.clone();
       _resort();
       onChanged!();
     });
@@ -28,9 +28,9 @@ class ShopListModel extends Subscribable {
         return;
       }
       log("added: ${p.$2.title}");
-      Item item = p.$2.clone();
+      ShopItem item = p.$2.clone();
       item.checked = false;
-      _items.add(item);
+      _list.items.add(item);
       _resort();
       onChanged!();
     });
@@ -40,7 +40,7 @@ class ShopListModel extends Subscribable {
         return;
       }
       log("removed: ${p.$2.title}");
-      _items.removeWhere((e) => e.title == p.$2.title);
+      _list.items.removeWhere((e) => e.title == p.$2.title);
       _resort();
       onChanged!();
     });
@@ -51,7 +51,7 @@ class ShopListModel extends Subscribable {
   }
 
   void _resort() {
-    _items.sort((a, b) {
+    _list.items.sort((a, b) {
       if (a.checked != b.checked) {
         return a.checked ? 1 : -1;
       }
@@ -59,8 +59,8 @@ class ShopListModel extends Subscribable {
     });
   }
 
-  List<Item> items() {
-    return _items;
+  List<ShopItem> items() {
+    return _list.items;
   }
 
   void checkItem(item, val) {

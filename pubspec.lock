@@ -117,7 +117,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "6e7f8169e17eb45c118358fb7b2b3547fac5ca58"
+      resolved-ref: "18d27e02d403e68684a3b5a7863edac3d125a211"
       url: "https://github.com/igorkorsukov/kors_yandexdisk_fs.git"
     source: git
     version: "0.0.1"

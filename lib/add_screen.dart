@@ -57,7 +57,7 @@ class _AddItemScreen extends State<AddItemScreen> {
             AddItem(
                 item: item,
                 onCheckedChanged: (val) {
-                  _model.changeItem(item, val);
+                  _model.changeItem(item, val!);
                 }),
         ],
       ),

@@ -8,30 +8,30 @@ class EditItemModel {
   Function? onChanged;
 
   final _store = Store.instance;
-  List<Item> _reference = [];
+  ShopList _reference = ShopList();
   final Set<String> _current = {};
-  final List<Item> _filtered = [];
+  final List<ShopItem> _filtered = [];
   String _searchString = "";
 
   void init() async {
-    _reference = List.of(await _store.loadItems(referenceName));
-    _sortByTitle(_reference);
+    _reference = (await _store.loadShopList(referenceName)).clone();
+    _sortByTitle(_reference.items);
 
-    var list = await _store.loadItems(editListName);
-    for (var i in list) {
+    var list = await _store.loadShopList(editListName);
+    for (var i in list.items) {
       _current.add(i.title);
     }
 
     _update();
   }
 
-  void _sortByTitle(List<Item> l) {
+  void _sortByTitle(List<ShopItem> l) {
     l.sort((a, b) {
       return a.title.compareTo(b.title);
     });
   }
 
-  List<Item> items() {
+  List<ShopItem> items() {
     return _filtered;
   }
 
@@ -39,7 +39,7 @@ class EditItemModel {
     _filtered.clear();
 
     bool needAddNew = true;
-    for (var i in _reference) {
+    for (var i in _reference.items) {
       i.checked = _current.contains(i.title);
       if (_searchString.isEmpty) {
         _filtered.add(i);
@@ -57,7 +57,7 @@ class EditItemModel {
     }
 
     if (_searchString.isNotEmpty && needAddNew) {
-      _filtered.add(Item(title: _searchString, isNew: true));
+      _filtered.add(ShopItem(title: _searchString, isNew: true));
     }
 
     onChanged!();
@@ -69,13 +69,13 @@ class EditItemModel {
     _update();
   }
 
-  void changeItem(item, isAdd) async {
+  void changeItem(ShopItem item, bool isAdd) async {
     item.checked = isAdd;
 
     if (item.isNew) {
       item.isNew = false;
-      _reference.add(item);
-      _sortByTitle(_reference);
+      _reference.items.add(item);
+      _sortByTitle(_reference.items);
       _store.addItem(referenceName, item);
     }
 
@@ -83,7 +83,9 @@ class EditItemModel {
       await _store.addItem(editListName, item);
       _current.add(item.title);
     } else {
-      await _store.removeItem(editListName, item);
+      ShopItem editListItem = item.clone();
+      editListItem.checked = false;
+      await _store.removeItem(editListName, editListItem);
       _current.remove(item.title);
     }
 
