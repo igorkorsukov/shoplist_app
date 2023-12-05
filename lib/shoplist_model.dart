@@ -65,6 +65,7 @@ class ShopListModel extends Subscribable {
 
   void checkItem(item, val) {
     item.checked = val;
+    _store.updateItem(name, item);
     _resort();
     onChanged!();
   }

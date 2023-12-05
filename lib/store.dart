@@ -69,6 +69,19 @@ class Store {
     }
   }
 
+  Future<void> updateItem(String name, ShopItem item) async {
+    try {
+      ShopList list = _cache[name] ?? ShopList();
+      var idx = list.items.indexWhere((e) => e.title == item.title);
+      list.items[idx] = item;
+      _cache[name] = list;
+
+      _writeItems(name, list);
+    } catch (e) {
+      log("[Store] addItem: $e");
+    }
+  }
+
   Future<void> removeItem(String name, ShopItem item) async {
     try {
       ShopList list = _cache[name] ?? ShopList();

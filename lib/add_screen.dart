@@ -49,7 +49,7 @@ class _AddItemScreen extends State<AddItemScreen> {
                 ),
           ),
         ),
-        actions: [SyncButton()],
+        actions: const [SyncButton()],
       ),
       body: ListView(
         children: [
