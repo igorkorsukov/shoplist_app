@@ -80,12 +80,12 @@ class EditItemModel {
     }
 
     if (isAdd) {
+      ShopItem editListItem = item.clone();
+      editListItem.checked = false;
       await _store.addItem(editListName, item);
       _current.add(item.title);
     } else {
-      ShopItem editListItem = item.clone();
-      editListItem.checked = false;
-      await _store.removeItem(editListName, editListItem);
+      await _store.removeItem(editListName, item);
       _current.remove(item.title);
     }
 

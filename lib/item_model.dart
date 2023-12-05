@@ -27,6 +27,7 @@ class ShopList {
   String name = "";
   String comment = "";
   List<ShopItem> items = [];
+  DateTime timestamp = DateTime.utc(1970);
 
   ShopList({this.name = "", this.comment = ""});
 
@@ -40,6 +41,7 @@ class ShopList {
     final itemsData = data['items'] as List<dynamic>?;
     var l = ShopList(name: data['name'] as String, comment: data['comment'] as String);
     l.items = itemsData!.map((itemData) => ShopItem.fromJson(itemData as Map<String, dynamic>)).toList();
+    l.timestamp = DateTime.parse(data['timestamp'] as String);
     return l;
   }
 
@@ -48,6 +50,7 @@ class ShopList {
       'name': name,
       'comment': comment,
       'items': items.map((item) => item.toJson()).toList(),
+      'timestamp': timestamp.toIso8601String(),
     };
   }
 }

@@ -5,8 +5,10 @@ import 'item_model.dart';
 import 'subscription/channel.dart';
 
 class Store {
-  final Channel<(String name, ShopItem item)> _itemAdded = Channel<(String name, ShopItem item)>();
-  final Channel<(String name, ShopItem item)> _itemRemoved = Channel<(String name, ShopItem item)>();
+  final Channel<DateTime> dataChanged = Channel<DateTime>();
+  final Channel<ShopList> listChanged = Channel<ShopList>();
+  final Channel<(String name, ShopItem item)> itemAdded = Channel<(String name, ShopItem item)>();
+  final Channel<(String name, ShopItem item)> itemRemoved = Channel<(String name, ShopItem item)>();
 
   bool _inited = false;
   final Map<String, ShopList> _cache = {};
@@ -15,8 +17,6 @@ class Store {
   Store._internal();
 
   static final Store instance = Store._internal();
-  Channel<(String, ShopItem)> get itemAdded => _itemAdded;
-  Channel<(String, ShopItem)> get itemRemoved => _itemRemoved;
 
   Future<void> init() async {
     if (_inited) {
@@ -24,7 +24,7 @@ class Store {
     }
 
     _prefs = await SharedPreferences.getInstance();
-    //_prefs.clear();
+    // _prefs.clear();
     _inited = true;
   }
 
@@ -50,20 +50,24 @@ class Store {
     }
   }
 
-  Future<void> _writeItems(String name, ShopList list) async {
+  Future<void> _writeList(ShopList list) async {
+    assert(list.name.isNotEmpty);
+    list.timestamp = DateTime.timestamp();
     var jsn = list.toJson();
-    _prefs.setString(name, json.encode(jsn));
+    _prefs.setString(list.name, json.encode(jsn));
+    dataChanged.send(list.timestamp);
   }
 
   Future<void> addItem(String name, ShopItem item) async {
     try {
       ShopList list = _cache[name] ?? ShopList();
+      list.name = name;
       list.items.add(item);
       _cache[name] = list;
 
-      _writeItems(name, list);
+      _writeList(list);
 
-      _itemAdded.send((name, item));
+      itemAdded.send((name, item));
     } catch (e) {
       log("[Store] addItem: $e");
     }
@@ -72,11 +76,14 @@ class Store {
   Future<void> updateItem(String name, ShopItem item) async {
     try {
       ShopList list = _cache[name] ?? ShopList();
+      if (list.items.isEmpty) {
+        return;
+      }
       var idx = list.items.indexWhere((e) => e.title == item.title);
       list.items[idx] = item;
       _cache[name] = list;
 
-      _writeItems(name, list);
+      _writeList(list);
     } catch (e) {
       log("[Store] addItem: $e");
     }
@@ -85,12 +92,27 @@ class Store {
   Future<void> removeItem(String name, ShopItem item) async {
     try {
       ShopList list = _cache[name] ?? ShopList();
+      if (list.items.isEmpty) {
+        return;
+      }
       list.items.removeWhere((e) => e.title == item.title);
       _cache[name] = list;
 
-      _writeItems(name, list);
+      _writeList(list);
 
-      _itemRemoved.send((name, item));
+      itemRemoved.send((name, item));
+    } catch (e) {
+      log("[Store] removeItem: $e");
+    }
+  }
+
+  Future<void> updateList(ShopList list) async {
+    try {
+      _cache[list.name] = list;
+
+      _writeList(list);
+
+      listChanged.send(list);
     } catch (e) {
       log("[Store] removeItem: $e");
     }

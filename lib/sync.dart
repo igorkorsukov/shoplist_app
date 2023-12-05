@@ -37,13 +37,7 @@ class Sync extends Subscribable {
 
     _inited = true;
 
-    _store.itemAdded.onReceive(this, (v) {
-      _needSync += 1;
-      _setStatus(SyncStatus.notsynced);
-    });
-
-    _store.itemRemoved.onReceive(this, (v) {
-      _needSync += 1;
+    _store.dataChanged.onReceive(this, (v) {
       _setStatus(SyncStatus.notsynced);
     });
 
@@ -77,11 +71,6 @@ class Sync extends Subscribable {
 
   Future<void> sync() async {
     log("[Sync] try sync...");
-    if (_needSync == _synced) {
-      log("[Sync] no need sync");
-      return;
-    }
-
     _setStatus(SyncStatus.running);
 
     List<String> names = [referenceName, editListName];
@@ -100,12 +89,13 @@ class Sync extends Subscribable {
         // get local
         ShopList localList = await _store.loadShopList(name);
 
-        // merge
-        ShopList mergedList = _merge(remoteList, localList);
-
-        // write merged list
-        {
-          var jsn = mergedList.toJson();
+        // use remoteList
+        if (remoteList.timestamp.isAfter(localList.timestamp)) {
+          _store.updateList(remoteList);
+        }
+        // use localList
+        else {
+          var jsn = localList.toJson();
           var str = json.encode(jsn);
           bytes = utf8.encode(str);
           await _ydfs.writeFile('app:/shoplist/$name.json', bytes, overwrite: true);
@@ -120,11 +110,5 @@ class Sync extends Subscribable {
     }
 
     log("[Sync] sync finished");
-  }
-
-  ShopList _merge(ShopList remoteList, ShopList localList) {
-    //! TODO
-    ShopList list = localList.clone();
-    return list;
   }
 }

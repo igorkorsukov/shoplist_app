@@ -23,6 +23,12 @@ class ShopListModel extends Subscribable {
       onChanged!();
     });
 
+    _store.listChanged.onReceive(this, (list) {
+      _list = list.clone();
+      _resort();
+      onChanged!();
+    });
+
     _store.itemAdded.onReceive(this, (p) {
       if (name != p.$1) {
         return;
