@@ -1,11 +1,10 @@
 class ShopItem {
   String title = "";
   bool checked = false;
-  bool isNew = false;
-  ShopItem({this.title = "", this.checked = false, this.isNew = false});
+  ShopItem({this.title = "", this.checked = false});
 
   ShopItem clone() {
-    return ShopItem(title: title, checked: checked, isNew: isNew);
+    return ShopItem(title: title, checked: checked);
   }
 
   factory ShopItem.fromJson(Map<String, dynamic> data) {

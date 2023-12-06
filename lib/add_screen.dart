@@ -35,18 +35,20 @@ class _AddItemScreen extends State<AddItemScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            filled: true,
-            isDense: true,
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () => _searchController.clear(),
+        title: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              filled: true,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () => _searchController.clear(),
+              ),
+              border: const OutlineInputBorder(),
             ),
-            border: const OutlineInputBorder(
-                //borderRadius: BorderRadius.circular(20.0),
-                ),
           ),
         ),
         actions: const [SyncButton()],

@@ -12,6 +12,7 @@ class EditItemModel {
   final Set<String> _current = {};
   final List<ShopItem> _filtered = [];
   String _searchString = "";
+  ShopItem? _newItem;
 
   void init() async {
     _reference = (await _store.loadShopList(referenceName)).clone();
@@ -61,7 +62,8 @@ class EditItemModel {
     _resort(_filtered);
 
     if (_searchString.isNotEmpty && needAddNew) {
-      _filtered.add(ShopItem(title: _searchString, isNew: true));
+      _newItem = ShopItem(title: _searchString);
+      _filtered.add(_newItem!);
     }
 
     onChanged!();
@@ -76,8 +78,8 @@ class EditItemModel {
   void changeItem(ShopItem item, bool isAdd) async {
     item.checked = isAdd;
 
-    if (item.isNew) {
-      item.isNew = false;
+    if (_newItem == item) {
+      _newItem = null;
       _reference.items.add(item);
       _store.addItem(referenceName, item);
     }
