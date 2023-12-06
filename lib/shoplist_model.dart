@@ -76,4 +76,18 @@ class ShopListModel extends Subscribable {
     _resort();
     onChanged!();
   }
+
+  void removeDone() {
+    _list.items.removeWhere((e) => e.checked == true);
+    _store.updateList(_list);
+    _resort();
+    onChanged!();
+  }
+
+  void removeAll() {
+    _list.items.clear();
+    _store.updateList(_list);
+    _resort();
+    onChanged!();
+  }
 }

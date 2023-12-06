@@ -85,6 +85,17 @@ class _ShopListState extends State<ShopListScreen> {
     super.dispose();
   }
 
+  void menuClicked(String val) {
+    switch (val) {
+      case 'remove_done':
+        model.removeDone();
+        break;
+      case 'remove_all':
+        model.removeAll();
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var items = model.items();
@@ -92,7 +103,16 @@ class _ShopListState extends State<ShopListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shoplist'),
-        actions: [SyncButton()],
+        actions: [
+          const SyncButton(),
+          PopupMenuButton<String>(
+            onSelected: (item) => menuClicked(item),
+            itemBuilder: (context) => [
+              const PopupMenuItem<String>(value: 'remove_done', child: Text('Очистить выполненые')),
+              const PopupMenuItem<String>(value: 'remove_all', child: Text('Очистить всё')),
+            ],
+          ),
+        ],
       ),
       body: Center(
           child: ListView(
