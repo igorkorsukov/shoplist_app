@@ -21,10 +21,9 @@ class Sync extends Subscribable {
   final _token = dotenv.env['YA_DISK_DEV_TOKEN'] ?? '';
   late final _ydfs = YandexDiskFS('https://cloud-api.yandex.net', _token);
   final Store _store = Store.instance;
-  int _needSync = 0;
-  int _synced = -1;
   final Duration _interval = const Duration(seconds: 10);
   Timer? _timer;
+  DateTime timestamp = DateTime.utc(1970);
 
   Sync._internal();
 
@@ -37,7 +36,10 @@ class Sync extends Subscribable {
 
     _inited = true;
 
-    _store.dataChanged.onReceive(this, (v) {
+    _store.dataChanged.onReceive(this, (t) {
+      if (t == timestamp) {
+        return;
+      }
       _setStatus(SyncStatus.notsynced);
     });
 
@@ -91,10 +93,12 @@ class Sync extends Subscribable {
 
         // use remoteList
         if (remoteList.timestamp.isAfter(localList.timestamp)) {
+          timestamp = remoteList.timestamp;
           _store.updateList(remoteList);
         }
         // use localList
         else {
+          timestamp = localList.timestamp;
           var jsn = localList.toJson();
           var str = json.encode(jsn);
           bytes = utf8.encode(str);
@@ -102,8 +106,9 @@ class Sync extends Subscribable {
         }
       }
 
-      _synced = _needSync;
-      _setStatus(SyncStatus.synced);
+      if (SyncStatus.running == status) {
+        _setStatus(SyncStatus.synced);
+      }
     } catch (e) {
       log("[Sync] sync: $e");
       _setStatus(SyncStatus.notsynced);

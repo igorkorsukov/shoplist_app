@@ -82,7 +82,7 @@ class EditItemModel {
     if (isAdd) {
       ShopItem editListItem = item.clone();
       editListItem.checked = false;
-      await _store.addItem(editListName, item);
+      await _store.addItem(editListName, editListItem);
       _current.add(item.title);
     } else {
       await _store.removeItem(editListName, item);
@@ -90,12 +90,5 @@ class EditItemModel {
     }
 
     _update();
-  }
-
-  void addNewItem(String title) {
-    // var item = Item(title: title);
-    // _items.add(item);
-    // _store.addItem(editListName, item);
-    // onChanged!();
   }
 }

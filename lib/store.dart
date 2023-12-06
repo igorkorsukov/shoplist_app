@@ -31,6 +31,7 @@ class Store {
   Future<ShopList> loadShopList(name) async {
     try {
       ShopList list = _cache[name] ?? ShopList();
+      list.name = name;
       if (list.items.isNotEmpty) {
         return list;
       }

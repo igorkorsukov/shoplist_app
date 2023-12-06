@@ -24,6 +24,9 @@ class ShopListModel extends Subscribable {
     });
 
     _store.listChanged.onReceive(this, (list) {
+      if (name != list.name) {
+        return;
+      }
       _list = list.clone();
       _resort();
       onChanged!();
@@ -34,9 +37,7 @@ class ShopListModel extends Subscribable {
         return;
       }
       log("added: ${p.$2.title}");
-      ShopItem item = p.$2.clone();
-      item.checked = false;
-      _list.items.add(item);
+      _list.items.add(p.$2);
       _resort();
       onChanged!();
     });
