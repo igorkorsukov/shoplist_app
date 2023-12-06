@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'shoplist_screen.dart';
@@ -42,8 +41,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/shoplist',
       routes: {
-        '/shoplist': (context) => ShopListScreen(),
-        '/additem': (context) => AddItemScreen(),
+        '/shoplist': (context) => const ShopListScreen(),
+        '/additem': (context) => const AddItemScreen(),
       },
     );
   }

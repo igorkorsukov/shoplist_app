@@ -15,7 +15,6 @@ class EditItemModel {
 
   void init() async {
     _reference = (await _store.loadShopList(referenceName)).clone();
-    _sortByTitle(_reference.items);
 
     var list = await _store.loadShopList(editListName);
     for (var i in list.items) {
@@ -25,14 +24,17 @@ class EditItemModel {
     _update();
   }
 
-  void _sortByTitle(List<ShopItem> l) {
-    l.sort((a, b) {
-      return a.title.compareTo(b.title);
-    });
-  }
-
   List<ShopItem> items() {
     return _filtered;
+  }
+
+  void _resort(List<ShopItem> l) {
+    l.sort((a, b) {
+      if (a.checked != b.checked) {
+        return a.checked ? -1 : 1;
+      }
+      return a.title.compareTo(b.title);
+    });
   }
 
   void _update() {
@@ -56,6 +58,8 @@ class EditItemModel {
       }
     }
 
+    _resort(_filtered);
+
     if (_searchString.isNotEmpty && needAddNew) {
       _filtered.add(ShopItem(title: _searchString, isNew: true));
     }
@@ -75,7 +79,6 @@ class EditItemModel {
     if (item.isNew) {
       item.isNew = false;
       _reference.items.add(item);
-      _sortByTitle(_reference.items);
       _store.addItem(referenceName, item);
     }
 

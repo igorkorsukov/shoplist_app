@@ -58,6 +58,7 @@ class _AddItemScreen extends State<AddItemScreen> {
                 item: item,
                 onCheckedChanged: (val) {
                   _model.changeItem(item, val!);
+                  _searchController.clear();
                 }),
         ],
       ),
