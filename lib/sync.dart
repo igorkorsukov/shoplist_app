@@ -1,4 +1,4 @@
-import 'dart:developer';
+//import 'dart:developer';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -7,6 +7,8 @@ import 'package:shoplist/item_model.dart';
 import 'subscription/subscribable.dart';
 import 'subscription/channel.dart';
 import 'store.dart';
+
+var log = print;
 
 enum SyncStatus { notsynced, running, synced }
 

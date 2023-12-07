@@ -50,8 +50,15 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_launcher_icons:
+  image_path: "assets/icon/icon-512.png"
+  android: true 
+  web:
+    generate: true
+  linux:
+    generate: true
 
 # The following section is specific to Flutter packages.
 flutter:

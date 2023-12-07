@@ -8,7 +8,7 @@
 PRODUCT_NAME = shoplist
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.shoplist
+PRODUCT_BUNDLE_IDENTIFIER = com.kors.shoplist
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.

@@ -1,4 +1,4 @@
-package com.example.shoplist
+package com.kors.shoplist
 
 import io.flutter.embedding.android.FlutterActivity
 

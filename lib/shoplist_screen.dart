@@ -87,6 +87,9 @@ class _ShopListState extends State<ShopListScreen> {
 
   void menuClicked(String val) {
     switch (val) {
+      case 'additems':
+        Navigator.pushNamed(context, '/additems');
+        break;
       case 'remove_done':
         model.removeDone();
         break;
@@ -108,6 +111,7 @@ class _ShopListState extends State<ShopListScreen> {
           PopupMenuButton<String>(
             onSelected: (item) => menuClicked(item),
             itemBuilder: (context) => [
+              const PopupMenuItem<String>(value: 'additems', child: Text('Добавить')),
               const PopupMenuItem<String>(value: 'remove_done', child: Text('Очистить выполненые')),
               const PopupMenuItem<String>(value: 'remove_all', child: Text('Очистить всё')),
             ],
@@ -125,13 +129,6 @@ class _ShopListState extends State<ShopListScreen> {
                 }),
         ],
       )),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/additem');
-          //model.addNew();
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
