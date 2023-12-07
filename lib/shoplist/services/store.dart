@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'item_model.dart';
-import 'subscription/channel.dart';
+import '../view/item_vm.dart';
+import '../../infrastructure/subscription/channel.dart';
 
 class Store {
   final Channel<DateTime> dataChanged = Channel<DateTime>();

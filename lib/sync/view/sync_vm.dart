@@ -1,5 +1,5 @@
-import 'sync.dart';
-import 'subscription/subscribable.dart';
+import '../services/sync.dart';
+import '../../infrastructure/subscription/subscribable.dart';
 
 class SyncModel extends Subscribable {
   Function(SyncStatus)? onStatusChanged;

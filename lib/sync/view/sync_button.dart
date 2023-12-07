@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shoplist/sync.dart';
-import 'sync_model.dart';
+import 'package:shoplist/sync/services/sync.dart';
+import 'sync_vm.dart';
 
 class SyncButton extends StatefulWidget {
   const SyncButton({super.key});

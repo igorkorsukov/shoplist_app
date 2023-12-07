@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
-import 'package:shoplist/item_model.dart';
-import 'subscription/subscribable.dart';
-import 'subscription/channel.dart';
-import 'store.dart';
+import 'package:shoplist/shoplist/view/item_vm.dart';
+import '../../infrastructure/subscription/subscribable.dart';
+import '../../infrastructure/subscription/channel.dart';
+import '../../shoplist/services/store.dart';
 
 var log = print;
 

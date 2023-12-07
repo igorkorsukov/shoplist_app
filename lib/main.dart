@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'shoplist_screen.dart';
-import 'add_screen.dart';
-import 'store.dart';
-import 'sync.dart';
+import 'shoplist/view/shoplist_screen.dart';
+import 'shoplist/view/add_screen.dart';
+import 'shoplist/services/store.dart';
+import 'sync/services/sync.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");

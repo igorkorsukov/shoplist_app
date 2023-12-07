@@ -1,7 +1,7 @@
 import 'dart:developer';
-import 'item_model.dart';
-import 'store.dart';
-import 'subscription/subscribable.dart';
+import 'item_vm.dart';
+import '../services/store.dart';
+import '../../infrastructure/subscription/subscribable.dart';
 
 class ShopListModel extends Subscribable {
   Function? onChanged;

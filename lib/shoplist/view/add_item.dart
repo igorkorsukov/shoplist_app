@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'item_model.dart';
+import 'item_vm.dart';
 
 class AddItem extends StatelessWidget {
   const AddItem({

@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'shoplist_model.dart';
+import 'shoplist_vm.dart';
 import 'shoplist_item.dart';
-import 'sync_button.dart';
+import '../../sync/view/sync_button.dart';
 
 // class Wrap {
 //   StatelessElement? element;

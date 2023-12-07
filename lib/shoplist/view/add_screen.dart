@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'add_model.dart';
+import 'add_vm.dart';
 import 'add_item.dart';
-import 'sync_button.dart';
+import '../../sync/view/sync_button.dart';
 
 class AddItemScreen extends StatefulWidget {
   const AddItemScreen({super.key});

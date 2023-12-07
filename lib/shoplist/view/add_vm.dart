@@ -1,6 +1,6 @@
 import 'dart:developer';
-import 'item_model.dart';
-import 'store.dart';
+import 'item_vm.dart';
+import '../services/store.dart';
 
 class EditItemModel {
   final String referenceName = "reference";
