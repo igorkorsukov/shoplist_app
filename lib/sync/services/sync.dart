@@ -6,7 +6,7 @@ import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
 import 'package:shoplist/shoplist/view/item_vm.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/subscription/channel.dart';
-import '../../shoplist/services/store.dart';
+import '../../shoplist/services/shoplsitrepository.dart';
 
 var log = print;
 
@@ -22,7 +22,7 @@ class Sync extends Subscribable {
   bool _inited = false;
   final _token = dotenv.env['YA_DISK_DEV_TOKEN'] ?? '';
   late final _ydfs = YandexDiskFS('https://cloud-api.yandex.net', _token);
-  final Store _store = Store.instance;
+  final ShopListRepository _store = ShopListRepository.instance;
   final Duration _interval = const Duration(seconds: 10);
   Timer? _timer;
   DateTime timestamp = DateTime.utc(1970);
@@ -91,7 +91,7 @@ class Sync extends Subscribable {
         }
 
         // get local
-        ShopList localList = await _store.loadShopList(name);
+        ShopList localList = await _store.readShopList(name);
 
         // use remoteList
         if (remoteList.timestamp.isAfter(localList.timestamp)) {

@@ -11,7 +11,7 @@ void main() async {
 
   LocalStorage.instance().init();
 
-  Store.instance.init();
+  ShopListRepository.instance.init();
 
   Sync.instance.init();
   Sync.instance.startSync();

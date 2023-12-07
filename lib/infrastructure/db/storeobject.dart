@@ -3,7 +3,7 @@ class StoreRecord {
   String key = "";
   String value = "";
 
-  StoreRecord();
+  StoreRecord({this.key = "", this.value = ""});
 
   factory StoreRecord.fromJson(Map<String, dynamic> data) {
     StoreRecord r = StoreRecord();

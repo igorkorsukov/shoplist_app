@@ -1,13 +1,13 @@
 import 'dart:developer';
 import 'item_vm.dart';
-import '../services/store.dart';
+import '../services/shoplsitrepository.dart';
 
 class EditItemModel {
   final String referenceName = "reference";
   final String editListName = "develop";
   Function? onChanged;
 
-  final _store = Store.instance;
+  final _store = ShopListRepository.instance;
   ShopList _reference = ShopList();
   final Set<String> _current = {};
   final List<ShopItem> _filtered = [];

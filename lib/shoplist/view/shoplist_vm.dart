@@ -1,13 +1,13 @@
 import 'dart:developer';
 import 'item_vm.dart';
-import '../services/store.dart';
+import '../services/shoplsitrepository.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 
 class ShopListModel extends Subscribable {
   Function? onChanged;
   String name = "develop";
 
-  final Store _store = Store.instance;
+  final ShopListRepository _store = ShopListRepository.instance;
   ShopList _list = ShopList();
 
   ShopListModel({
@@ -17,7 +17,7 @@ class ShopListModel extends Subscribable {
   void init() async {
     await _store.init();
 
-    _store.loadShopList(name).then((list) {
+    _store.readShopList(name).then((list) {
       _list = list.clone();
       _resort();
       onChanged!();
