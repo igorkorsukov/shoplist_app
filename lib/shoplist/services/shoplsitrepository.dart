@@ -8,9 +8,9 @@ import 'shoplist.dart';
 class ShopListRepository {
   final LocalStorage _store = LocalStorage.instance();
 
-  ShopItem _itemFromJson(String id, String payload) {
+  ShopItem _itemFromJson(ID id, String payload) {
     var jsn = json.decode(payload) as Map<String, dynamic>;
-    return ShopItem(ID(id), title: jsn['title'] as String, checked: jsn['checked'] as bool);
+    return ShopItem(id, title: jsn['title'] as String, checked: jsn['checked'] as bool);
   }
 
   String _itemToJson(ShopItem item) {
@@ -23,7 +23,7 @@ class ShopListRepository {
 
   ShopList fromStoreObject(StoreObject obj) {
     ShopList list = ShopList.empty();
-    for (var r in obj.resords) {
+    for (var r in obj.records.values) {
       switch (r.type) {
         case 'name':
           list.name = r.payload;
@@ -40,10 +40,10 @@ class ShopListRepository {
 
   StoreObject toStoreObject(ShopList list) {
     StoreObject obj = StoreObject();
-    obj.resords.add(StoreRecord(type: 'name', id: "name", payload: list.name));
-    obj.resords.add(StoreRecord(type: 'comment', id: "comment", payload: list.comment));
+    obj.records[ID("name")] = StoreRecord(ID("name"), type: 'name', payload: list.name);
+    obj.records[ID("comment")] = StoreRecord(ID("comment"), type: 'comment', payload: list.comment);
     for (var it in list.items) {
-      obj.resords.add(StoreRecord(type: 'item', id: it.id.toString(), payload: _itemToJson(it)));
+      obj.records[it.id] = StoreRecord(it.id, type: 'item', payload: _itemToJson(it));
     }
     return obj;
   }

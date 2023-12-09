@@ -35,6 +35,19 @@ class LocalStorage {
   }
 
   Future<bool> writeObject(String key, StoreObject obj) {
+    // timestamp
+    {
+      var currentObj = readObject(key);
+      obj.records.forEach((id, r) {
+        var cr = currentObj?.records[id];
+        if (cr != null && cr.timestamp.year != 1970 && cr.payload == r.payload) {
+          r.timestamp = cr.timestamp;
+        } else {
+          r.timestamp = DateTime.timestamp();
+        }
+      });
+    }
+
     var jsn = obj.toJson();
     var str = json.encode(jsn);
     return _prefs.setString(key, str);
