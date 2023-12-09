@@ -5,8 +5,9 @@ class StoreRecord {
   ID id = ID();
   String type = "";
   String payload = "";
+  bool deleted = false;
 
-  StoreRecord(this.id, {this.type = "", this.payload = ""});
+  StoreRecord(this.id, {this.type = "", this.payload = "", this.deleted = false});
   StoreRecord.empty();
 
   factory StoreRecord.fromJson(Map<String, dynamic> data) {
@@ -15,6 +16,7 @@ class StoreRecord {
     r.type = data['type'] as String;
     r.id = ID(data['id'] as String);
     r.payload = data['payload'] as String;
+    r.deleted = data['deleted'] as bool;
     return r;
   }
 
@@ -24,6 +26,7 @@ class StoreRecord {
       'type': type,
       'id': id.toString(),
       'payload': payload,
+      'deleted': deleted,
     };
   }
 }
