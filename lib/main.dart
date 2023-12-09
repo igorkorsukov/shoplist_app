@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'infrastructure/sync/syncservice.dart';
+import 'infrastructure/db/localstorage.dart';
+
+import 'shoplist/services/shoplsitrepository.dart';
+
 import 'shoplist/view/perform_screen.dart';
 import 'shoplist/view/edit_screen.dart';
-import 'sync/services/syncservice.dart';
-import 'infrastructure/db/localstorage.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
 
   await LocalStorage.instance().init();
+  await SyncService.instance().init();
+  SyncService.instance().startSync();
 
-  Sync.instance.init();
-  Sync.instance.startSync();
+  await ShopListRepository.instance().init();
 
   runApp(const MyApp());
 }

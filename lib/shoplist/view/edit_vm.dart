@@ -38,12 +38,14 @@ class EditItemModel extends Subscribable {
     list = await _serv.readShopList(editListName);
     _makeCurrent(list);
 
-    _serv.listChanged().onReceive(this, (list) {
-      if (list.name == referenceName) {
+    _serv.listChanged().onReceive(this, (name, list) async {
+      if (name == referenceName) {
+        list = list ?? await _serv.readShopList(name);
         _makeItems(list);
       }
 
-      if (list.name == editListName) {
+      if (name == editListName) {
+        list = list ?? await _serv.readShopList(name);
         _makeCurrent(list);
       }
 

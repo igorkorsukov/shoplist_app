@@ -29,11 +29,12 @@ class ShopListModel extends Subscribable {
       onChanged!();
     });
 
-    _serv.listChanged().onReceive(this, (list) {
-      if (name != list.name) {
+    _serv.listChanged().onReceive(this, (listName, list) async {
+      if (name != listName) {
         return;
       }
 
+      list = list ?? await _serv.readShopList(name);
       _makeItems(list);
       _resort();
       onChanged!();
