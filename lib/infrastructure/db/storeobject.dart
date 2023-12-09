@@ -1,23 +1,26 @@
 class StoreRecord {
   DateTime timestamp = DateTime.utc(1970);
-  String key = "";
-  String value = "";
+  String type = "";
+  String id = "";
+  String payload = "";
 
-  StoreRecord({this.key = "", this.value = ""});
+  StoreRecord({this.type = "", this.id = "", this.payload = ""});
 
   factory StoreRecord.fromJson(Map<String, dynamic> data) {
     StoreRecord r = StoreRecord();
-    r.key = data['key'] as String;
     r.timestamp = DateTime.parse(data['timestamp'] as String);
-    r.value = data['key'] as String;
+    r.type = data['type'] as String;
+    r.id = data['id'] as String;
+    r.payload = data['payload'] as String;
     return r;
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'key': key,
       'timestamp': timestamp.toIso8601String(),
-      'value': value,
+      'type': type,
+      'id': id,
+      'payload': payload,
     };
   }
 }

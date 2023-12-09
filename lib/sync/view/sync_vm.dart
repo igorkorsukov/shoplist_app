@@ -1,4 +1,4 @@
-import '../services/sync.dart';
+import '../services/syncservice.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 
 class SyncModel extends Subscribable {

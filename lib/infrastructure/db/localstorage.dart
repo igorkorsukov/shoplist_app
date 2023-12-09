@@ -7,8 +7,8 @@ class LocalStorage {
   late SharedPreferences _prefs;
 
   LocalStorage._internal();
-
-  static LocalStorage instance() => LocalStorage._internal();
+  static final LocalStorage _instance = LocalStorage._internal();
+  static LocalStorage instance() => LocalStorage._instance;
 
   Future<void> init() async {
     if (_inited) {
@@ -16,7 +16,7 @@ class LocalStorage {
     }
 
     _prefs = await SharedPreferences.getInstance();
-    // _prefs.clear();
+    //_prefs.clear();
     _inited = true;
   }
 

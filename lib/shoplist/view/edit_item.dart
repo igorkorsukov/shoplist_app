@@ -8,7 +8,7 @@ class AddItem extends StatelessWidget {
     required this.onCheckedChanged,
   });
 
-  final ShopItem item;
+  final ShopItemV item;
   final ValueChanged<bool?> onCheckedChanged;
 
   @override
@@ -19,7 +19,7 @@ class AddItem extends StatelessWidget {
         ),
         value: item.checked,
         onChanged: (val) {
-          onCheckedChanged(val);
+          Future.delayed(const Duration(milliseconds: 250), () => onCheckedChanged(val));
         });
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'add_vm.dart';
-import 'add_item.dart';
+import 'edit_vm.dart';
+import 'edit_item.dart';
 import '../../sync/view/sync_button.dart';
 
 class AddItemScreen extends StatefulWidget {
@@ -29,6 +29,12 @@ class _AddItemScreen extends State<AddItemScreen> {
   }
 
   @override
+  void dispose() {
+    _model.deinit();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var items = _model.items();
 
@@ -42,7 +48,7 @@ class _AddItemScreen extends State<AddItemScreen> {
             decoration: InputDecoration(
               filled: true,
               isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
               suffixIcon: IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: () => _searchController.clear(),
