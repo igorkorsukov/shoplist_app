@@ -9,6 +9,8 @@ import 'shoplist/services/shoplsitrepository.dart';
 import 'shoplist/view/perform_screen.dart';
 import 'shoplist/view/edit_screen.dart';
 
+// flutter build apk --split-per-abi
+
 void main() async {
   await dotenv.load(fileName: ".env");
 

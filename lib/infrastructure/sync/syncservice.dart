@@ -99,11 +99,11 @@ class SyncService extends Subscribable {
         if (bytes.isNotEmpty) {
           var str = utf8.decode(bytes);
           var jsn = json.decode(str);
-          remoteObj = StoreObject.fromJson(jsn);
+          remoteObj = StoreObject.fromJson(jsn, deleted: true);
         }
 
         // get local
-        StoreObject? localObj = _store.readObject(name);
+        StoreObject? localObj = _store.readObject(name, deleted: true);
 
         // merge
         _MergeResult mr = _merge(localObj, remoteObj);

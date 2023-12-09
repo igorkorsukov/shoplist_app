@@ -31,11 +31,13 @@ class LocalStorage {
   Future<bool> clear() => _prefs.clear();
 
   Set<String> _readNames() {
-    var str = _prefs.getString(_namesKey);
-    if (str == null) {
-      return {};
-    }
-    return str.split('|').toSet();
+    // var str = _prefs.getString(_namesKey);
+    // if (str == null) {
+    //   return {};
+    // }
+    // return str.split('|').toSet();
+    //! TODO
+    return {"reference2", "develop2"};
   }
 
   void _writeNames(Set<String> names) {
@@ -50,19 +52,19 @@ class LocalStorage {
     return _names;
   }
 
-  StoreObject? readObject(String name) {
+  StoreObject? readObject(String name, {bool deleted = false}) {
     String? raw = _prefs.getString(name);
     if (raw == null) {
       return null;
     }
     var jsn = json.decode(raw) as List<dynamic>;
-    return StoreObject.fromJson(jsn);
+    return StoreObject.fromJson(jsn, deleted: deleted);
   }
 
   Future<bool> writeObject(String service, String name, StoreObject obj) {
     // timestamp and deleted
+    StoreObject mergedObj = StoreObject();
     {
-      StoreObject mergedObj = StoreObject();
       var currentObj = readObject(name);
 
       // new object
@@ -94,10 +96,11 @@ class LocalStorage {
           }
           // check update
           else {
+            nr.deleted = false;
             assert(cr.timestamp.year != 1970);
 
             // no change
-            if (nr.payload == cr.payload) {
+            if (nr.deleted == cr.deleted && nr.payload == cr.payload) {
               nr.timestamp = cr.timestamp;
               mergedObj.records[id] = nr;
             }
@@ -119,7 +122,7 @@ class LocalStorage {
       }
     }
 
-    var jsn = obj.toJson();
+    var jsn = mergedObj.toJson();
     var str = json.encode(jsn);
     var ret = _prefs.setString(name, str);
     _objectChanged.send(service, name);

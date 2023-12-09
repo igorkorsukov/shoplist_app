@@ -36,10 +36,13 @@ class StoreObject {
 
   StoreObject();
 
-  factory StoreObject.fromJson(List<dynamic> records) {
+  factory StoreObject.fromJson(List<dynamic> records, {bool deleted = false}) {
     StoreObject obj = StoreObject();
     for (var rd in records) {
       var r = StoreRecord.fromJson(rd as Map<String, dynamic>);
+      if (!deleted && r.deleted) {
+        continue;
+      }
       obj.records[r.id] = r;
     }
     return obj;
