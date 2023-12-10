@@ -1,14 +1,14 @@
 import 'dart:developer';
-import 'item_vm.dart';
 import '../../infrastructure/subscription/subscribable.dart';
+import '../../infrastructure/modularity/inject.dart';
 import '../services/shoplistservice.dart';
 import 'item_vm.dart';
 
-class ShopListModel extends Subscribable {
+class ShopListModel with Subscribable {
   Function? onChanged;
   String name = "develop2";
 
-  final ShopListService _serv = ShopListService.instance();
+  final serv = Inject<ShopListService>();
   final List<ShopItemV> _items = [];
 
   ShopListModel({
@@ -23,18 +23,18 @@ class ShopListModel extends Subscribable {
   }
 
   void init() async {
-    _serv.readShopList(name).then((list) {
+    serv().readShopList(name).then((list) {
       _makeItems(list);
       _resort();
       onChanged!();
     });
 
-    _serv.listChanged().onReceive(this, (listName, list) async {
+    serv().listChanged().onReceive(this, (listName, list) async {
       if (name != listName) {
         return;
       }
 
-      list = list ?? await _serv.readShopList(name);
+      list = list ?? await serv().readShopList(name);
       _makeItems(list);
       _resort();
       onChanged!();
@@ -59,14 +59,14 @@ class ShopListModel extends Subscribable {
   }
 
   void checkItem(item, val) {
-    _serv.checkItem(name, item.id, val);
+    serv().checkItem(name, item.id, val);
   }
 
   void removeDone() {
-    _serv.removeDone(name);
+    serv().removeDone(name);
   }
 
   void removeAll() {
-    _serv.removeAll(name);
+    serv().removeAll(name);
   }
 }

@@ -5,17 +5,17 @@ import '../../infrastructure/db/storeobject.dart';
 import '../../infrastructure/uid/id.dart';
 import '../../infrastructure/subscription/channel.dart';
 import '../../infrastructure/subscription/subscribable.dart';
+import '../../infrastructure/modularity/injectable.dart';
+import '../../infrastructure/modularity/inject.dart';
 import 'shoplist.dart';
 
-class ShopListRepository extends Subscribable {
+class ShopListRepository with Subscribable, Injectable {
   final String serviceName = "shoplist";
-  final LocalStorage _store = LocalStorage.instance();
+  final store = Inject<LocalStorage>();
   final _listChanged = Channel2<String, ShopList?>();
   bool _inited = false;
 
-  ShopListRepository._();
-  static final _instance = ShopListRepository._();
-  static ShopListRepository instance() => ShopListRepository._instance;
+  ShopListRepository();
 
   Channel2<String, ShopList?> listChanged() => _listChanged;
 
@@ -25,7 +25,7 @@ class ShopListRepository extends Subscribable {
     }
     _inited = true;
 
-    _store.objectChanged().onReceive(this, (service, name) {
+    store().objectChanged().onReceive(this, (service, name) {
       if (serviceName == service) {
         return;
       }
@@ -34,7 +34,7 @@ class ShopListRepository extends Subscribable {
   }
 
   Future<ShopList> readShopList(name) async {
-    StoreObject? obj = _store.readObject(name);
+    StoreObject? obj = store().readObject(name);
     if (obj == null) {
       return ShopList.empty();
     }
@@ -45,7 +45,7 @@ class ShopListRepository extends Subscribable {
 
   Future<void> writeShopList(ShopList list) async {
     StoreObject obj = _toStoreObject(list);
-    await _store.writeObject(serviceName, list.name, obj);
+    await store().writeObject(serviceName, list.name, obj);
     _listChanged.send(list.name, list);
   }
 

@@ -3,14 +3,14 @@ import 'edit_vm.dart';
 import 'edit_item.dart';
 import '../../sync/view/sync_button.dart';
 
-class AddItemScreen extends StatefulWidget {
-  const AddItemScreen({super.key});
+class EditListScreen extends StatefulWidget {
+  const EditListScreen({super.key});
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreen();
+  State<EditListScreen> createState() => _AddItemScreen();
 }
 
-class _AddItemScreen extends State<AddItemScreen> {
+class _AddItemScreen extends State<EditListScreen> {
   final _model = EditItemModel();
   final _searchController = TextEditingController();
 

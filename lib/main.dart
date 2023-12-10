@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'infrastructure/sync/syncservice.dart';
-import 'infrastructure/db/localstorage.dart';
-
-import 'shoplist/services/shoplsitrepository.dart';
+import 'infrastructure/modularity/modulesetup.dart';
+import 'infrastructure/infrastructuremodule.dart';
+import 'shoplist/shoplistmodule.dart';
 
 import 'shoplist/view/perform_screen.dart';
 import 'shoplist/view/edit_screen.dart';
@@ -14,11 +13,18 @@ import 'shoplist/view/edit_screen.dart';
 void main() async {
   await dotenv.load(fileName: ".env");
 
-  await LocalStorage.instance().init();
-  await SyncService.instance().init();
-  SyncService.instance().startSync();
+  final List<ModuleSetup> modules = [InfrastructureModule(), ShopListModule()];
+  for (var m in modules) {
+    m.registerExports();
+  }
 
-  await ShopListRepository.instance().init();
+  for (var m in modules) {
+    m.resolveImports();
+  }
+
+  for (var m in modules) {
+    m.onInit();
+  }
 
   runApp(const MyApp());
 }
@@ -49,7 +55,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/shoplist',
       routes: {
         '/shoplist': (context) => const ShopListScreen(),
-        '/additems': (context) => const AddItemScreen(),
+        '/edititems': (context) => const EditListScreen(),
       },
     );
   }

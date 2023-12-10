@@ -2,15 +2,16 @@ import 'dart:developer';
 import 'item_vm.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/uid/id.dart';
+import '../../infrastructure/modularity/inject.dart';
 import '../services/shoplist.dart';
 import '../services/shoplistservice.dart';
 
-class EditItemModel extends Subscribable {
+class EditItemModel with Subscribable {
   final String referenceName = "reference2";
   final String editListName = "develop2";
   Function? onChanged;
 
-  final ShopListService _serv = ShopListService.instance();
+  final serv = Inject<ShopListService>();
   final List<ShopItemV> _reference = [];
   final Set<ID> _current = {};
   final List<ShopItemV> _filtered = [];
@@ -32,20 +33,20 @@ class EditItemModel extends Subscribable {
   }
 
   void init() async {
-    var list = await _serv.readShopList(referenceName);
+    var list = await serv().readShopList(referenceName);
     _makeItems(list);
 
-    list = await _serv.readShopList(editListName);
+    list = await serv().readShopList(editListName);
     _makeCurrent(list);
 
-    _serv.listChanged().onReceive(this, (name, list) async {
+    serv().listChanged().onReceive(this, (name, list) async {
       if (name == referenceName) {
-        list = list ?? await _serv.readShopList(name);
+        list = list ?? await serv().readShopList(name);
         _makeItems(list);
       }
 
       if (name == editListName) {
-        list = list ?? await _serv.readShopList(name);
+        list = list ?? await serv().readShopList(name);
         _makeCurrent(list);
       }
 
@@ -112,15 +113,15 @@ class EditItemModel extends Subscribable {
     ID addID = ID();
     if (_newItem == item) {
       _newItem = null;
-      addID = await _serv.addItem(referenceName, ShopItem(ID(""), title: item.title, checked: isAdd));
+      addID = await serv().addItem(referenceName, ShopItem(ID(""), title: item.title, checked: isAdd));
     } else {
       addID = item.id;
     }
 
     if (isAdd) {
-      await _serv.addItem(editListName, ShopItem(addID, title: item.title, checked: false));
+      await serv().addItem(editListName, ShopItem(addID, title: item.title, checked: false));
     } else {
-      await _serv.removeItem(editListName, item.id);
+      await serv().removeItem(editListName, item.id);
     }
 
     _update();

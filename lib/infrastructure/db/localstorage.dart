@@ -2,18 +2,17 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../subscription/channel.dart';
 import '../uid/id.dart';
+import '../modularity/injectable.dart';
 import 'storeobject.dart';
 
-class LocalStorage {
+class LocalStorage with Injectable {
   bool _inited = false;
   late SharedPreferences _prefs;
   final String _namesKey = "object_names";
   Set<String> _names = {};
   final _objectChanged = Channel2<String, String>();
 
-  LocalStorage._internal();
-  static final LocalStorage _instance = LocalStorage._internal();
-  static LocalStorage instance() => LocalStorage._instance;
+  LocalStorage();
 
   Channel2<String /*service*/, String /*objName*/ > objectChanged() => _objectChanged;
 

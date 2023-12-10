@@ -1,15 +1,15 @@
-//import 'dart:developer';
+import 'dart:developer';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
 import '../subscription/subscribable.dart';
 import '../subscription/channel.dart';
-import '../db/localstorage.dart';
-import '../db/storeobject.dart';
 import '../uid/id.dart';
-
-var log = print;
+import '../modularity/inject.dart';
+import '../modularity/injectable.dart';
+import 'localstorage.dart';
+import 'storeobject.dart';
 
 enum SyncStatus { notsynced, running, synced }
 
@@ -19,7 +19,7 @@ class _MergeResult {
   bool isLocalChanged = false;
 }
 
-class SyncService extends Subscribable {
+class SyncService with Subscribable, Injectable {
   final String serviceName = "sync";
   SyncStatus status = SyncStatus.notsynced;
   final statusChanged = Channel<SyncStatus>();
@@ -27,22 +27,20 @@ class SyncService extends Subscribable {
   bool _inited = false;
   final _token = dotenv.env['YA_DISK_DEV_TOKEN'] ?? '';
   late final _ydfs = YandexDiskFS('https://cloud-api.yandex.net', _token);
-  final LocalStorage _store = LocalStorage.instance();
+  final store = Inject<LocalStorage>();
 
   final Duration _interval = const Duration(seconds: 10);
   Timer? _timer;
   SyncStatus _nextStatus = SyncStatus.notsynced;
 
-  SyncService._internal();
-  static final SyncService _instance = SyncService._internal();
-  static SyncService instance() => SyncService._instance;
+  SyncService();
 
   Future<void> init() async {
     if (_inited) {
       return;
     }
 
-    _store.objectChanged().onReceive(this, (service, name) {
+    store().objectChanged().onReceive(this, (service, name) {
       if (serviceName == service) {
         return;
       }
@@ -89,7 +87,7 @@ class SyncService extends Subscribable {
     _setStatus(SyncStatus.running);
     _nextStatus = SyncStatus.synced;
 
-    Set<String> names = _store.objectNames();
+    Set<String> names = store().objectNames();
 
     try {
       for (var name in names) {
@@ -103,7 +101,7 @@ class SyncService extends Subscribable {
         }
 
         // get local
-        StoreObject? localObj = _store.readObject(name, deleted: true);
+        StoreObject? localObj = store().readObject(name, deleted: true);
 
         // merge
         _MergeResult mr = _merge(localObj, remoteObj);
@@ -112,7 +110,7 @@ class SyncService extends Subscribable {
         }
 
         if (mr.isLocalChanged) {
-          _store.writeObject(serviceName, name, mr.obj!);
+          store().writeObject(serviceName, name, mr.obj!);
         }
 
         if (mr.isRemoteChanged) {

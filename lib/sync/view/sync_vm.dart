@@ -1,10 +1,10 @@
-import '../../infrastructure/sync/syncservice.dart';
+import '../../infrastructure/db/syncservice.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 
-class SyncModel extends Subscribable {
+class SyncModel with Subscribable {
   Function(SyncStatus)? onStatusChanged;
 
-  final SyncService _sync = SyncService.instance();
+  final SyncService _sync = SyncService();
 
   SyncModel({
     this.onStatusChanged,
