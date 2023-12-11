@@ -11,7 +11,7 @@ import 'shoplist/view/edit_screen.dart';
 // flutter build apk --split-per-abi
 
 void main() async {
-  await dotenv.load(fileName: ".env");
+  //await dotenv.load(fileName: ".env");
 
   final List<ModuleSetup> modules = [InfrastructureModule(), ShopListModule()];
   for (var m in modules) {
