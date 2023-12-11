@@ -1,7 +1,7 @@
 import '../uid/id.dart';
 
 class StoreRecord {
-  DateTime timestamp = DateTime.utc(1970);
+  int verstamp = 0;
   ID id = ID();
   String type = "";
   String payload = "";
@@ -12,7 +12,7 @@ class StoreRecord {
 
   factory StoreRecord.fromJson(Map<String, dynamic> data) {
     StoreRecord r = StoreRecord.empty();
-    r.timestamp = DateTime.parse(data['timestamp'] as String);
+    r.verstamp = data['verstamp'] as int;
     r.type = data['type'] as String;
     r.id = ID(data['id'] as String);
     r.payload = data['payload'] as String;
@@ -22,7 +22,7 @@ class StoreRecord {
 
   Map<String, dynamic> toJson() {
     return {
-      'timestamp': timestamp.toIso8601String(),
+      'verstamp': verstamp,
       'type': type,
       'id': id.toString(),
       'payload': payload,

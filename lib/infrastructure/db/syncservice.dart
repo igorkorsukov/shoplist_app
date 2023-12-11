@@ -162,10 +162,10 @@ class SyncService with Subscribable, Injectable {
         mr = lr;
         res.isRemoteChanged = true;
       } else {
-        if (lr.timestamp == rr.timestamp) {
+        if (lr.verstamp == rr.verstamp) {
           // equal
           mr = lr;
-        } else if (lr.timestamp.isAfter(rr.timestamp)) {
+        } else if (lr.verstamp > rr.verstamp) {
           mr = lr;
           res.isRemoteChanged = true;
         } else {

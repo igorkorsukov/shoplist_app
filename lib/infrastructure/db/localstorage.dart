@@ -1,16 +1,19 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../subscription/channel.dart';
 import '../uid/id.dart';
 import '../modularity/injectable.dart';
+import '../modularity/inject.dart';
+import 'driver.dart';
+import 'verstamp.dart';
 import 'storeobject.dart';
 
 class LocalStorage with Injectable {
   bool _inited = false;
-  late SharedPreferences _prefs;
   final String _namesKey = "object_names";
   Set<String> _names = {};
   final _objectChanged = Channel2<String, String>();
+  final driver = Inject<Driver>();
+  final verstamp = Inject<Verstamp>();
 
   LocalStorage();
 
@@ -21,13 +24,11 @@ class LocalStorage with Injectable {
       return;
     }
 
-    SharedPreferences.setPrefix("com.kors.shoplist.");
-    _prefs = await SharedPreferences.getInstance();
     //_prefs.clear();
     _inited = true;
   }
 
-  Future<bool> clear() => _prefs.clear();
+  Future<bool> clear() => driver().clear();
 
   Set<String> _readNames() {
     // var str = _prefs.getString(_namesKey);
@@ -41,7 +42,7 @@ class LocalStorage with Injectable {
 
   void _writeNames(Set<String> names) {
     var str = names.join('|');
-    _prefs.setString(_namesKey, str);
+    driver().writeString(_namesKey, str);
   }
 
   Set<String> objectNames() {
@@ -52,7 +53,7 @@ class LocalStorage with Injectable {
   }
 
   StoreObject? readObject(String name, {bool deleted = false}) {
-    String? raw = _prefs.getString(name);
+    String? raw = driver().readString(name);
     if (raw == null) {
       return null;
     }
@@ -64,12 +65,15 @@ class LocalStorage with Injectable {
     // timestamp and deleted
     StoreObject mergedObj = StoreObject();
     {
-      var currentObj = readObject(name);
+      var vs = verstamp().verstamp();
+      var currentObj = readObject(name, deleted: true);
 
       // new object
       if (currentObj == null) {
-        obj.records.forEach((id, r) {
-          r.timestamp = DateTime.timestamp();
+        mergedObj = obj;
+
+        mergedObj.records.forEach((id, r) {
+          r.verstamp = vs;
         });
       }
       // update object
@@ -84,28 +88,29 @@ class LocalStorage with Injectable {
           // new record
           if (cr == null) {
             assert(nr != null);
-            nr!.timestamp = DateTime.timestamp();
+            nr!.verstamp = vs;
             mergedObj.records[id] = nr;
           }
-          // deleted record
+          // deleted record if not deleted
           else if (nr == null) {
-            cr.deleted = true;
-            cr.timestamp = DateTime.timestamp();
+            if (!cr.deleted) {
+              cr.deleted = true;
+              cr.verstamp = vs;
+            }
             mergedObj.records[id] = cr;
           }
           // check update
           else {
-            nr.deleted = false;
-            assert(cr.timestamp.year != 1970);
+            assert(cr.verstamp != 0);
 
             // no change
             if (nr.deleted == cr.deleted && nr.payload == cr.payload) {
-              nr.timestamp = cr.timestamp;
+              nr.verstamp = cr.verstamp;
               mergedObj.records[id] = nr;
             }
             // changed
             else {
-              nr.timestamp = DateTime.timestamp();
+              nr.verstamp = vs;
               mergedObj.records[id] = nr;
             }
           }
@@ -123,7 +128,7 @@ class LocalStorage with Injectable {
 
     var jsn = mergedObj.toJson();
     var str = json.encode(jsn);
-    var ret = _prefs.setString(name, str);
+    var ret = driver().writeString(name, str);
     _objectChanged.send(service, name);
     return ret;
   }
