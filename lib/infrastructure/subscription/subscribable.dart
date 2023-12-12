@@ -1,6 +1,6 @@
 import 'dart:async';
 
-mixin Subscribable {
+mixin class Subscribable {
   List<StreamSubscription> subscriptions = [];
 
   void unsubscribe() {
