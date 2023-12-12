@@ -15,6 +15,9 @@ class LocalStorage with Injectable {
   final driver = Inject<Driver>();
   final verstamp = Inject<Verstamp>();
 
+  //! NOTE Temporary
+  Set<String> objNames = {"reference", "shoplist"};
+
   LocalStorage();
 
   Channel2<String /*service*/, String /*objName*/ > objectChanged() => _objectChanged;
@@ -37,7 +40,7 @@ class LocalStorage with Injectable {
     // }
     // return str.split('|').toSet();
     //! TODO
-    return {"reference2", "develop2"};
+    return objNames;
   }
 
   void _writeNames(Set<String> names) {
@@ -73,7 +76,10 @@ class LocalStorage with Injectable {
         mergedObj = obj;
 
         mergedObj.records.forEach((id, r) {
-          r.verstamp = vs;
+          //! NOTE If verstamp set outside (ex sync), don't touch it
+          if (r.verstamp == 0) {
+            r.verstamp = vs;
+          }
         });
       }
       // update object
@@ -88,7 +94,10 @@ class LocalStorage with Injectable {
           // new record
           if (cr == null) {
             assert(nr != null);
-            nr!.verstamp = vs;
+            //! NOTE If verstamp set outside (ex sync), don't touch it
+            if (nr!.verstamp == 0) {
+              nr.verstamp = vs;
+            }
             mergedObj.records[id] = nr;
           }
           // deleted record if not deleted

@@ -1,13 +1,13 @@
 import 'dart:developer';
 import 'dart:convert';
 import 'dart:async';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
+
 import '../subscription/subscribable.dart';
 import '../subscription/channel.dart';
 import '../uid/id.dart';
 import '../modularity/inject.dart';
 import '../modularity/injectable.dart';
+import 'cloudfs.dart';
 import 'localstorage.dart';
 import 'storeobject.dart';
 
@@ -25,8 +25,7 @@ class SyncService with Subscribable, Injectable {
   final statusChanged = Channel<SyncStatus>();
 
   bool _inited = false;
-  final _token = dotenv.env['YA_DISK_DEV_TOKEN'] ?? '';
-  late final _ydfs = YandexDiskFS('https://cloud-api.yandex.net', _token);
+  final cloud = Inject<CloudFS>();
   final store = Inject<LocalStorage>();
 
   final Duration _interval = const Duration(seconds: 10);
@@ -53,7 +52,7 @@ class SyncService with Subscribable, Injectable {
     });
 
     try {
-      await _ydfs.makeDir('app:/shoplist');
+      await cloud().makeDir('app:/shoplist');
     } catch (e) {
       log("[Sync] init: $e");
     }
@@ -93,7 +92,7 @@ class SyncService with Subscribable, Injectable {
       for (var name in names) {
         // get remote object
         StoreObject? remoteObj;
-        var bytes = await _ydfs.readFile('app:/shoplist/$name.json', maybeNotExists: true);
+        var bytes = await cloud().readFile('app:/shoplist/$name.json', maybeNotExists: true);
         if (bytes.isNotEmpty) {
           var str = utf8.decode(bytes);
           var jsn = json.decode(str);
@@ -117,7 +116,7 @@ class SyncService with Subscribable, Injectable {
           var jsn = mr.obj!.toJson();
           var str = json.encode(jsn);
           bytes = utf8.encode(str);
-          await _ydfs.writeFile('app:/shoplist/$name.json', bytes, overwrite: true);
+          await cloud().writeFile('app:/shoplist/$name.json', bytes, overwrite: true);
         }
       }
 

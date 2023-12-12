@@ -13,7 +13,8 @@ jobs:
       with:
         channel: stable
         version: 3.16.0
-
+    - name: Create dummy env
+      run: touch .env 
     - name: Install dependencies
       run: flutter pub get
     - name: Run tests with coverage

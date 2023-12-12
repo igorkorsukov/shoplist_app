@@ -1,38 +1,15 @@
+import 'package:test/test.dart';
 import 'package:shoplist/infrastructure/db/verstamp.dart';
 import 'package:shoplist/infrastructure/subscription/subscribable.dart';
-import 'package:test/test.dart';
 
-import 'package:shoplist/infrastructure/db/driver.dart';
 import 'package:shoplist/infrastructure/db/localstorage.dart';
 import 'package:shoplist/infrastructure/db/storeobject.dart';
 import 'package:shoplist/infrastructure/uid/id.dart';
 
+import 'mocks/driver_mock.dart';
+
 // flutter test --coverage
 // genhtml -o ./coverage/report ./coverage/lcov.info
-
-class DriverMock implements Driver {
-  final Map<String, String> data = {};
-
-  @override
-  Future<void> init(String prefix) async {}
-
-  @override
-  Future<bool> clear() {
-    data.clear();
-    return Future.value(true);
-  }
-
-  @override
-  String? readString(String key) {
-    return data[key];
-  }
-
-  @override
-  Future<bool> writeString(String key, String value) {
-    data[key] = value;
-    return Future.value(true);
-  }
-}
 
 class ObjectChangedSubscribable with Subscribable {
   int triggered = 0;
@@ -58,6 +35,7 @@ void main() {
   final store = LocalStorage();
 
   setUp(() async {
+    verstamp.setMode(VerstampMode.fixed);
     store.driver.set(driver);
     store.verstamp.set(verstamp);
     await store.init();
@@ -73,7 +51,7 @@ void main() {
 
     // write object
     {
-      verstamp.setFixed(2);
+      verstamp.setValue(2);
       store.writeObject("test", "obj1", obj);
       expect(driver.data.length, 2);
       expect(driver.data["object_names"], "obj1");
@@ -90,7 +68,7 @@ void main() {
     // change and write object
     {
       obj.records[id_1]!.payload = "value1 changed";
-      verstamp.setFixed(3);
+      verstamp.setValue(3);
       store.writeObject("test", "obj1", obj);
     }
 
@@ -105,7 +83,7 @@ void main() {
     // remove one record and write object
     {
       obj.records.remove(id_1);
-      verstamp.setFixed(4);
+      verstamp.setValue(4);
       store.writeObject("test", "obj1", obj);
     }
 
@@ -131,7 +109,7 @@ void main() {
 
     // write with record marked as deleted
     {
-      verstamp.setFixed(5);
+      verstamp.setValue(5);
       store.writeObject("test", "obj1", obj);
     }
 
@@ -147,7 +125,7 @@ void main() {
     // add new record
     {
       obj.records[id_3] = StoreRecord(id_3, type: "item", payload: "value3");
-      verstamp.setFixed(6);
+      verstamp.setValue(6);
       store.writeObject("test", "obj1", obj);
     }
 
@@ -178,7 +156,7 @@ void main() {
     ObjectChangedSubscribable subsc = ObjectChangedSubscribable();
     store.objectChanged().onReceive(subsc, subsc.onTriggered);
 
-    verstamp.setFixed(2);
+    verstamp.setValue(2);
 
     waitAsync() async {
       await Future.delayed(const Duration(seconds: 1));

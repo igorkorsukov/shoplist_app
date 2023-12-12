@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import '../uid/id.dart';
 
 class StoreRecord {
@@ -9,6 +10,19 @@ class StoreRecord {
 
   StoreRecord(this.id, {this.type = "", this.payload = "", this.deleted = false});
   StoreRecord.empty();
+
+  @override
+  bool operator ==(Object other) {
+    return other is StoreRecord &&
+        verstamp == other.verstamp &&
+        id == other.id &&
+        type == other.type &&
+        payload == other.payload &&
+        deleted == other.deleted;
+  }
+
+  @override
+  int get hashCode => Object.hash(verstamp, id, type, payload, deleted);
 
   factory StoreRecord.fromJson(Map<String, dynamic> data) {
     StoreRecord r = StoreRecord.empty();
@@ -35,6 +49,14 @@ class StoreObject {
   Map<ID, StoreRecord> records = {};
 
   StoreObject();
+
+  @override
+  bool operator ==(Object other) {
+    return other is StoreObject && const MapEquality().equals(records, other.records);
+  }
+
+  @override
+  int get hashCode => const MapEquality().hash(records);
 
   factory StoreObject.fromJson(List<dynamic> records, {bool deleted = false}) {
     StoreObject obj = StoreObject();

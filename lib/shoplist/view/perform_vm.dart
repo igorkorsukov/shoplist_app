@@ -6,7 +6,7 @@ import 'item_vm.dart';
 
 class ShopListModel with Subscribable {
   Function? onChanged;
-  String name = "develop2";
+  String name = "shoplsit";
 
   final serv = Inject<ShopListService>();
   final List<ShopItemV> _items = [];

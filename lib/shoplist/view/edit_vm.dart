@@ -7,8 +7,8 @@ import '../services/shoplist.dart';
 import '../services/shoplistservice.dart';
 
 class EditItemModel with Subscribable {
-  final String referenceName = "reference2";
-  final String editListName = "develop2";
+  final String referenceName = "reference";
+  final String editListName = "shoplist";
   Function? onChanged;
 
   final serv = Inject<ShopListService>();
