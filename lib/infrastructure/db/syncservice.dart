@@ -86,38 +86,18 @@ class SyncService with Subscribable, Injectable {
     _setStatus(SyncStatus.running);
     _nextStatus = SyncStatus.synced;
 
-    Set<String> names = store().objectNames();
+    Set<ID> objectIDs = store().objectIDs();
 
     try {
-      for (var name in names) {
-        // get remote object
-        StoreObject? remoteObj;
-        var bytes = await cloud().readFile('app:/shoplist/$name.json', maybeNotExists: true);
-        if (bytes.isNotEmpty) {
-          var str = utf8.decode(bytes);
-          var jsn = json.decode(str);
-          remoteObj = StoreObject.fromJson(jsn, deleted: true);
-        }
+      assert(objectIDs.isNotEmpty);
 
-        // get local
-        StoreObject? localObj = store().readObject(name, deleted: true);
+      if (objectIDs.length == 1) {
+        await _syncObject(objectIDs.first);
+        objectIDs = store().objectIDs();
+      }
 
-        // merge
-        _MergeResult mr = _merge(localObj, remoteObj);
-        if (mr.obj == null) {
-          return;
-        }
-
-        if (mr.isLocalChanged) {
-          store().writeObject(serviceName, name, mr.obj!);
-        }
-
-        if (mr.isRemoteChanged) {
-          var jsn = mr.obj!.toJson();
-          var str = json.encode(jsn);
-          bytes = utf8.encode(str);
-          await cloud().writeFile('app:/shoplist/$name.json', bytes, overwrite: true);
-        }
+      for (var objId in objectIDs) {
+        await _syncObject(objId);
       }
 
       _setStatus(_nextStatus);
@@ -127,6 +107,37 @@ class SyncService with Subscribable, Injectable {
     }
 
     log("[Sync] sync finished");
+  }
+
+  Future<void> _syncObject(ID objId) async {
+    // get remote object
+    StoreObject? remoteObj;
+    var bytes = await cloud().readFile('app:/shoplist/$objId.json', maybeNotExists: true);
+    if (bytes.isNotEmpty) {
+      var str = utf8.decode(bytes);
+      var jsn = json.decode(str);
+      remoteObj = StoreObject.fromJson(objId, jsn, deleted: true);
+    }
+
+    // get local
+    StoreObject? localObj = store().readObject(objId, deleted: true);
+
+    // merge
+    _MergeResult mr = _merge(localObj, remoteObj);
+    if (mr.obj == null) {
+      return;
+    }
+
+    if (mr.isLocalChanged) {
+      store().writeObject(serviceName, mr.obj!);
+    }
+
+    if (mr.isRemoteChanged) {
+      var jsn = mr.obj!.toJson();
+      var str = json.encode(jsn);
+      bytes = utf8.encode(str);
+      await cloud().writeFile('app:/shoplist/$objId.json', bytes, overwrite: true);
+    }
   }
 
   _MergeResult _merge(StoreObject? localObj, StoreObject? remoteObj) {
@@ -143,8 +154,10 @@ class SyncService with Subscribable, Injectable {
       return res;
     }
 
+    assert(localObj.id == remoteObj.id);
+
     // actual merge
-    res.obj = StoreObject();
+    res.obj = StoreObject(localObj.id);
 
     Set<ID> unitedIDs = localObj.records.keys.toSet();
     unitedIDs.addAll(remoteObj.records.keys);

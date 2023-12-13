@@ -9,67 +9,71 @@ import 'storeobject.dart';
 
 class LocalStorage with Injectable {
   bool _inited = false;
-  final String _namesKey = "object_names";
-  Set<String> _names = {};
-  final _objectChanged = Channel2<String, String>();
+  final ID _objID = ID("object_ids"); // ID of internal object
+  Set<ID> _objectIDs = {};
+  final _objectChanged = Channel2<String, ID>();
   final driver = Inject<Driver>();
   final verstamp = Inject<Verstamp>();
 
-  //! NOTE Temporary
-  Set<String> objNames = {"reference", "shoplist"};
-
   LocalStorage();
 
-  Channel2<String /*service*/, String /*objName*/ > objectChanged() => _objectChanged;
+  Channel2<String /*service*/, ID /*objID*/ > objectChanged() => _objectChanged;
 
   Future<void> init() async {
     if (_inited) {
       return;
     }
 
-    //_prefs.clear();
     _inited = true;
   }
 
   Future<bool> clear() => driver().clear();
 
-  Set<String> _readNames() {
-    // var str = _prefs.getString(_namesKey);
-    // if (str == null) {
-    //   return {};
-    // }
-    // return str.split('|').toSet();
-    //! TODO
-    return objNames;
-  }
-
-  void _writeNames(Set<String> names) {
-    var str = names.join('|');
-    driver().writeString(_namesKey, str);
-  }
-
-  Set<String> objectNames() {
-    if (_names.isEmpty) {
-      _names = _readNames();
+  Set<ID> _readObjectIDs() {
+    var obj = readObject(_objID);
+    if (obj == null) {
+      return {_objID};
     }
-    return _names;
+
+    _objectIDs.clear();
+    _objectIDs.add(_objID);
+    obj.records.forEach((id, r) {
+      _objectIDs.add(id);
+    });
+
+    return _objectIDs;
   }
 
-  StoreObject? readObject(String name, {bool deleted = false}) {
-    String? raw = driver().readString(name);
+  void _writeObjectIDs(Set<ID> ids) {
+    var obj = StoreObject(_objID);
+    for (var id in ids) {
+      obj.add(StoreRecord(id));
+    }
+    writeObject("localstore", obj);
+  }
+
+  Set<ID> objectIDs() {
+    if (_objectIDs.isEmpty) {
+      _objectIDs = _readObjectIDs();
+    }
+    return _objectIDs;
+  }
+
+  StoreObject? readObject(ID objId, {bool deleted = false}) {
+    String? raw = driver().readString(objId.toString());
     if (raw == null) {
       return null;
     }
     var jsn = json.decode(raw) as List<dynamic>;
-    return StoreObject.fromJson(jsn, deleted: deleted);
+    return StoreObject.fromJson(objId, jsn, deleted: deleted);
   }
 
-  Future<bool> writeObject(String service, String name, StoreObject obj) {
+  Future<bool> writeObject(String service, StoreObject obj) {
     // timestamp and deleted
-    StoreObject mergedObj = StoreObject();
+    StoreObject mergedObj = StoreObject(obj.id);
     {
       var vs = verstamp().verstamp();
-      var currentObj = readObject(name, deleted: true);
+      var currentObj = readObject(obj.id, deleted: true);
 
       // new object
       if (currentObj == null) {
@@ -127,18 +131,23 @@ class LocalStorage with Injectable {
       }
     }
 
-    // names
+    // ids
     {
-      if (!_names.contains(name)) {
-        _names.add(name);
-        _writeNames(_names);
+      if (mergedObj.id == _objID) {
+        _objectIDs.clear();
+      } else {
+        var ids = objectIDs();
+        if (!ids.contains(mergedObj.id)) {
+          ids.add(mergedObj.id);
+          _writeObjectIDs(ids);
+        }
       }
     }
 
     var jsn = mergedObj.toJson();
     var str = json.encode(jsn);
-    var ret = driver().writeString(name, str);
-    _objectChanged.send(service, name);
+    var ret = driver().writeString(mergedObj.id.toString(), str);
+    _objectChanged.send(service, mergedObj.id);
     return ret;
   }
 }

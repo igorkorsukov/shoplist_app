@@ -18,7 +18,6 @@ class Client {
   Future<void> setup(CloudFSMock cloud, Verstamp verstamp) async {
     store.driver.set(driver);
     store.verstamp.set(verstamp);
-    store.objNames = {"obj1"};
     serv.store.set(store);
     serv.cloud.set(cloud);
     await store.init();
@@ -39,38 +38,39 @@ void main() {
   });
 
   test('write / read object', () async {
+    final ID obj1Id = ID("obj1");
     final ID id_1 = ID("id_1");
     final ID id_2 = ID("id_2");
     final ID id_3 = ID("id_3");
-    StoreObject obj1_1 = StoreObject();
+    StoreObject obj1_1 = StoreObject(obj1Id);
     obj1_1.records[id_1] = StoreRecord(id_1, type: "item", payload: "value1");
     obj1_1.records[id_2] = StoreRecord(id_2, type: "item", payload: "value2");
 
     // [client 1] write obj to local store and sync
     {
-      client_1.store.writeObject("test", "obj1", obj1_1);
+      client_1.store.writeObject("test", obj1_1);
       await client_1.serv.sync();
 
-      expect(cloud.data.length, 1);
+      expect(cloud.data.length, 2);
 
-      StoreObject? obj1_2 = client_1.store.readObject("obj1");
+      StoreObject? obj1_2 = client_1.store.readObject(obj1Id);
       expect(obj1_2, isNotNull);
       expect(obj1_2, equals(obj1_1));
 
       await client_1.serv.sync();
 
-      StoreObject? obj1_3 = client_1.store.readObject("obj1");
+      StoreObject? obj1_3 = client_1.store.readObject(obj1Id);
       expect(obj1_3, isNotNull);
       expect(obj1_3, equals(obj1_1));
     }
 
     // [client 2] read, sync and read obj again
     {
-      StoreObject? obj2_1 = client_2.store.readObject("obj1");
+      StoreObject? obj2_1 = client_2.store.readObject(obj1Id);
       expect(obj2_1, isNull);
 
       await client_2.serv.sync();
-      obj2_1 = client_2.store.readObject("obj1");
+      obj2_1 = client_2.store.readObject(obj1Id);
 
       expect(obj2_1, isNotNull);
       expect(obj2_1, equals(obj1_1));
@@ -79,11 +79,11 @@ void main() {
     // modify and sync
     {
       obj1_1.records[id_3] = StoreRecord(id_3, type: "item", payload: "value3");
-      client_1.store.writeObject("test", "obj1", obj1_1);
+      client_1.store.writeObject("test", obj1_1);
       await client_1.serv.sync();
 
       await client_2.serv.sync();
-      StoreObject? obj2_1 = client_2.store.readObject("obj1");
+      StoreObject? obj2_1 = client_2.store.readObject(obj1Id);
       expect(obj2_1, isNotNull);
       expect(obj2_1, equals(obj1_1));
     }
@@ -91,11 +91,11 @@ void main() {
     // delete and sync
     {
       obj1_1.records.remove(id_1);
-      client_1.store.writeObject("test", "obj1", obj1_1);
+      client_1.store.writeObject("test", obj1_1);
       await client_1.serv.sync();
 
       await client_2.serv.sync();
-      StoreObject? obj2_1 = client_2.store.readObject("obj1");
+      StoreObject? obj2_1 = client_2.store.readObject(obj1Id);
       expect(obj2_1, isNotNull);
       expect(obj2_1, equals(obj1_1));
     }

@@ -14,18 +14,18 @@ import 'mocks/driver_mock.dart';
 class ObjectChangedSubscribable with Subscribable {
   int triggered = 0;
   String service = "";
-  String objectName = "";
+  ID objectId = ID();
 
   void clear() {
     triggered = 0;
     service = "";
-    objectName = "";
+    objectId = ID();
   }
 
-  void onTriggered(String serv, String name) {
+  void onTriggered(String serv, ID objId) {
     triggered += 1;
     service = serv;
-    objectName = name;
+    objectId = objId;
   }
 }
 
@@ -42,24 +42,24 @@ void main() {
   });
 
   test('write / read object', () {
+    final ID obj1 = ID("obj1");
     final ID id_1 = ID("id_1");
     final ID id_2 = ID("id_2");
     final ID id_3 = ID("id_3");
-    StoreObject obj = StoreObject();
-    obj.records[id_1] = StoreRecord(id_1, type: "item", payload: "value1");
+    StoreObject obj = StoreObject(obj1);
+    obj.add(StoreRecord(id_1, type: "item", payload: "value1"));
     obj.records[id_2] = StoreRecord(id_2, type: "item", payload: "value2");
 
     // write object
     {
       verstamp.setValue(2);
-      store.writeObject("test", "obj1", obj);
+      store.writeObject("test", obj);
       expect(driver.data.length, 2);
-      expect(driver.data["object_names"], "obj1");
     }
 
     // read object and check verstamps
     {
-      StoreObject? obj2 = store.readObject("obj1");
+      StoreObject? obj2 = store.readObject(obj1);
       expect(obj2, isNotNull);
       expect(obj2!.records[id_1]!.verstamp, equals(2));
       expect(obj2.records[id_2]!.verstamp, equals(2));
@@ -69,12 +69,12 @@ void main() {
     {
       obj.records[id_1]!.payload = "value1 changed";
       verstamp.setValue(3);
-      store.writeObject("test", "obj1", obj);
+      store.writeObject("test", obj);
     }
 
     // read object and check new verstamp for changed record
     {
-      StoreObject? obj3 = store.readObject("obj1");
+      StoreObject? obj3 = store.readObject(obj1);
       expect(obj3, isNotNull);
       expect(obj3!.records[id_1]!.verstamp, equals(3));
       expect(obj3.records[id_2]!.verstamp, equals(2));
@@ -84,12 +84,12 @@ void main() {
     {
       obj.records.remove(id_1);
       verstamp.setValue(4);
-      store.writeObject("test", "obj1", obj);
+      store.writeObject("test", obj);
     }
 
     // read object without removed record
     {
-      StoreObject? obj4 = store.readObject("obj1");
+      StoreObject? obj4 = store.readObject(obj1);
       expect(obj4, isNotNull);
       expect(obj4!.records[id_1], isNull);
       expect(obj4.records[id_2]!.verstamp, equals(2));
@@ -97,7 +97,7 @@ void main() {
 
     // read object with removed record
     {
-      StoreObject? obj5 = store.readObject("obj1", deleted: true);
+      StoreObject? obj5 = store.readObject(obj1, deleted: true);
       expect(obj5, isNotNull);
       expect(obj5!.records[id_1]!.verstamp, equals(4));
       expect(obj5.records[id_1]!.deleted, isTrue);
@@ -110,12 +110,12 @@ void main() {
     // write with record marked as deleted
     {
       verstamp.setValue(5);
-      store.writeObject("test", "obj1", obj);
+      store.writeObject("test", obj);
     }
 
     // read object, should be same as obj5
     {
-      StoreObject? obj6 = store.readObject("obj1", deleted: true);
+      StoreObject? obj6 = store.readObject(obj1, deleted: true);
       expect(obj6, isNotNull);
       expect(obj6!.records[id_1]!.verstamp, equals(4));
       expect(obj6.records[id_1]!.deleted, isTrue);
@@ -126,12 +126,12 @@ void main() {
     {
       obj.records[id_3] = StoreRecord(id_3, type: "item", payload: "value3");
       verstamp.setValue(6);
-      store.writeObject("test", "obj1", obj);
+      store.writeObject("test", obj);
     }
 
     // read object
     {
-      StoreObject? obj7 = store.readObject("obj1", deleted: true);
+      StoreObject? obj7 = store.readObject(obj1, deleted: true);
       expect(obj7, isNotNull);
       expect(obj7!.records[id_1]!.verstamp, equals(4));
       expect(obj7.records[id_1]!.deleted, isTrue);
@@ -147,9 +147,10 @@ void main() {
   });
 
   test('object changed notify', () async {
+    final ID obj1 = ID("obj1");
     final ID id_1 = ID("id_1");
     final ID id_2 = ID("id_2");
-    StoreObject obj = StoreObject();
+    StoreObject obj = StoreObject(obj1);
     obj.records[id_1] = StoreRecord(id_1, type: "item", payload: "value1");
     obj.records[id_2] = StoreRecord(id_2, type: "item", payload: "value2");
 
@@ -165,21 +166,21 @@ void main() {
     // write object 1
     {
       subsc.clear();
-      store.writeObject("test", "obj1", obj);
+      store.writeObject("test", obj);
       await waitAsync();
       expect(subsc.triggered, 1);
       expect(subsc.service, "test");
-      expect(subsc.objectName, "obj1");
+      expect(subsc.objectId, obj1);
     }
 
     // write object 1 again
     {
       subsc.clear();
-      store.writeObject("test", "obj1", obj);
+      store.writeObject("test", obj);
       await waitAsync();
       expect(subsc.triggered, 1);
       expect(subsc.service, "test");
-      expect(subsc.objectName, "obj1");
+      expect(subsc.objectId, obj1);
     }
   });
 }

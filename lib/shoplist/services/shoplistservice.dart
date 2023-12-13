@@ -11,37 +11,33 @@ class ShopListService with Injectable {
 
   ShopListService();
 
-  Channel2<String, ShopList?> listChanged() => repo().listChanged();
+  Channel2<ID, ShopList?> listChanged() => repo().listChanged();
 
   Future<ShopList> readShopList(name) async {
     return repo().readShopList(name);
   }
 
-  Future<void> checkItem(String name, ID itemID, bool val) async {
-    ShopList list = await repo().readShopList(name);
-    ShopItem item = list.items.firstWhere((e) => e.id == itemID);
+  Future<void> checkItem(ID listId, ID itemId, bool val) async {
+    ShopList list = await repo().readShopList(listId);
+    ShopItem item = list.items.firstWhere((e) => e.id == itemId);
     item.checked = val;
     repo().writeShopList(list);
   }
 
-  Future<void> removeDone(String name) async {
-    ShopList list = await repo().readShopList(name);
+  Future<void> removeDone(ID listId) async {
+    ShopList list = await repo().readShopList(listId);
     list.items.removeWhere((e) => e.checked == true);
     repo().writeShopList(list);
   }
 
-  Future<void> removeAll(String name) async {
-    ShopList list = await repo().readShopList(name);
+  Future<void> removeAll(ID listId) async {
+    ShopList list = await repo().readShopList(listId);
     list.items.clear();
     repo().writeShopList(list);
   }
 
-  Future<ID> addItem(String name, ShopItem item) async {
-    ShopList list = await repo().readShopList(name);
-    if (!list.id.isValid()) {
-      list.id = UIDGen.newID();
-      list.name = name;
-    }
+  Future<ID> addItem(ID listID, ShopItem item) async {
+    ShopList list = await repo().readShopList(listID);
 
     if (!item.id.isValid()) {
       item.id = UIDGen.newID();
@@ -52,8 +48,8 @@ class ShopListService with Injectable {
     return item.id;
   }
 
-  Future<void> removeItem(String name, ID itemID) async {
-    ShopList list = await repo().readShopList(name);
+  Future<void> removeItem(ID listID, ID itemID) async {
+    ShopList list = await repo().readShopList(listID);
     list.items.removeWhere((e) => e.id == itemID);
     repo().writeShopList(list);
   }

@@ -46,20 +46,25 @@ class StoreRecord {
 }
 
 class StoreObject {
+  ID id = ID();
   Map<ID, StoreRecord> records = {};
 
-  StoreObject();
+  StoreObject(this.id);
 
   @override
   bool operator ==(Object other) {
-    return other is StoreObject && const MapEquality().equals(records, other.records);
+    return other is StoreObject && id == other.id && const MapEquality().equals(records, other.records);
   }
 
   @override
-  int get hashCode => const MapEquality().hash(records);
+  int get hashCode => Object.hash(id.hashCode, const MapEquality().hash(records));
 
-  factory StoreObject.fromJson(List<dynamic> records, {bool deleted = false}) {
-    StoreObject obj = StoreObject();
+  void add(StoreRecord r) {
+    records[r.id] = r;
+  }
+
+  factory StoreObject.fromJson(ID objId, List<dynamic> records, {bool deleted = false}) {
+    StoreObject obj = StoreObject(objId);
     for (var rd in records) {
       var r = StoreRecord.fromJson(rd as Map<String, dynamic>);
       if (!deleted && r.deleted) {

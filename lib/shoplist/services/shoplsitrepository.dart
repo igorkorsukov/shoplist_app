@@ -12,12 +12,12 @@ import 'shoplist.dart';
 class ShopListRepository with Subscribable, Injectable {
   final String serviceName = "shoplist";
   final store = Inject<LocalStorage>();
-  final _listChanged = Channel2<String, ShopList?>();
+  final _listChanged = Channel2<ID, ShopList?>();
   bool _inited = false;
 
   ShopListRepository();
 
-  Channel2<String, ShopList?> listChanged() => _listChanged;
+  Channel2<ID, ShopList?> listChanged() => _listChanged;
 
   Future<void> init() async {
     if (_inited) {
@@ -25,16 +25,16 @@ class ShopListRepository with Subscribable, Injectable {
     }
     _inited = true;
 
-    store().objectChanged().onReceive(this, (service, name) {
+    store().objectChanged().onReceive(this, (service, id) {
       if (serviceName == service) {
         return;
       }
-      _listChanged.send(name, null);
+      _listChanged.send(id, null);
     });
   }
 
-  Future<ShopList> readShopList(name) async {
-    StoreObject? obj = store().readObject(name);
+  Future<ShopList> readShopList(ID listId) async {
+    StoreObject? obj = store().readObject(listId);
     if (obj == null) {
       return ShopList.empty();
     }
@@ -45,8 +45,8 @@ class ShopListRepository with Subscribable, Injectable {
 
   Future<void> writeShopList(ShopList list) async {
     StoreObject obj = _toStoreObject(list);
-    await store().writeObject(serviceName, list.name, obj);
-    _listChanged.send(list.name, list);
+    await store().writeObject(serviceName, obj);
+    _listChanged.send(list.id, list);
   }
 
   ShopItem _itemFromJson(ID id, String payload) {
@@ -63,7 +63,7 @@ class ShopListRepository with Subscribable, Injectable {
   }
 
   ShopList _fromStoreObject(StoreObject obj) {
-    ShopList list = ShopList.empty();
+    ShopList list = ShopList(obj.id);
     for (var r in obj.records.values) {
       switch (r.type) {
         case 'name':
@@ -80,11 +80,11 @@ class ShopListRepository with Subscribable, Injectable {
   }
 
   StoreObject _toStoreObject(ShopList list) {
-    StoreObject obj = StoreObject();
-    obj.records[ID("name")] = StoreRecord(ID("name"), type: 'name', payload: list.name);
-    obj.records[ID("comment")] = StoreRecord(ID("comment"), type: 'comment', payload: list.comment);
+    StoreObject obj = StoreObject(list.id);
+    obj.add(StoreRecord(ID("name"), type: 'name', payload: list.name));
+    obj.add(StoreRecord(ID("comment"), type: 'comment', payload: list.comment));
     for (var it in list.items) {
-      obj.records[it.id] = StoreRecord(it.id, type: 'item', payload: _itemToJson(it));
+      obj.add(StoreRecord(it.id, type: 'item', payload: _itemToJson(it)));
     }
     return obj;
   }
