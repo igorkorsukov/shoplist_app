@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import '../../infrastructure/uid/id.dart';
 import 'edit_vm.dart';
 import 'edit_item.dart';
 import '../../sync/view/sync_button.dart';
 
 class EditListScreen extends StatefulWidget {
-  const EditListScreen({super.key});
+  const EditListScreen({
+    super.key,
+    this.args,
+  });
+
+  final Map<String, dynamic>? args;
 
   @override
   State<EditListScreen> createState() => _AddItemScreen();
@@ -25,6 +31,7 @@ class _AddItemScreen extends State<EditListScreen> {
       _model.search(_searchController.text);
     });
 
+    _model.editListId = widget.args!["listId"] as ID;
     _model.init();
   }
 

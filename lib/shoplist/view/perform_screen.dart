@@ -32,7 +32,9 @@ class _ShopListState extends State<ShopListScreen> {
   void menuClicked(String val) {
     switch (val) {
       case 'edititems':
-        Navigator.pushNamed(context, '/edititems');
+        Navigator.pushNamed(context, '/edititems', arguments: <String, dynamic>{
+          'listId': model.listId,
+        });
         break;
       case 'remove_done':
         model.removeDone();

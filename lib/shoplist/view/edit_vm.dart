@@ -8,7 +8,7 @@ import '../services/shoplistservice.dart';
 
 class EditItemModel with Subscribable {
   final ID referenceID = ID("reference");
-  final ID editListID = ID("shoplist");
+  ID editListId = ID("shoplist");
   Function? onChanged;
 
   final serv = Inject<ShopListService>();
@@ -36,7 +36,7 @@ class EditItemModel with Subscribable {
     var list = await serv().readShopList(referenceID);
     _makeItems(list);
 
-    list = await serv().readShopList(editListID);
+    list = await serv().readShopList(editListId);
     _makeCurrent(list);
 
     serv().listChanged().onReceive(this, (name, list) async {
@@ -45,7 +45,7 @@ class EditItemModel with Subscribable {
         _makeItems(list);
       }
 
-      if (name == editListID) {
+      if (name == editListId) {
         list = list ?? await serv().readShopList(name);
         _makeCurrent(list);
       }
@@ -119,9 +119,9 @@ class EditItemModel with Subscribable {
     }
 
     if (isAdd) {
-      await serv().addItem(editListID, ShopItem(addID, title: item.title, checked: false));
+      await serv().addItem(editListId, ShopItem(addID, title: item.title, checked: false));
     } else {
-      await serv().removeItem(editListID, item.id);
+      await serv().removeItem(editListId, item.id);
     }
 
     _update();

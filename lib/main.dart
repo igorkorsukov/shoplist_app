@@ -29,6 +29,13 @@ void main() async {
   runApp(const MyApp());
 }
 
+typedef WidgetBuilderArgs = Widget Function(BuildContext context, Map<String, dynamic> args);
+var routes = <String, WidgetBuilderArgs>{
+  '/': (context, args) => const ShopListScreen(),
+  '/shoplist': (context, args) => const ShopListScreen(),
+  '/edititems': (context, args) => EditListScreen(args: args),
+};
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   // This widget is the root of your application.
@@ -52,10 +59,17 @@ class MyApp extends StatelessWidget {
             titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20)),
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/shoplist',
-      routes: {
-        '/shoplist': (context) => const ShopListScreen(),
-        '/edititems': (context) => const EditListScreen(),
+      onGenerateRoute: (RouteSettings settings) {
+        // print('build route for ${settings.name}');
+        WidgetBuilderArgs? builder = routes[settings.name];
+        assert(builder != null);
+        return MaterialPageRoute(builder: (ctx) {
+          Map<String, dynamic> args = {};
+          if (settings.arguments != null) {
+            args = settings.arguments as Map<String, dynamic>;
+          }
+          return builder!(ctx, args);
+        });
       },
     );
   }
