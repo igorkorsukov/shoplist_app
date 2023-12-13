@@ -1,17 +1,18 @@
 import '../../infrastructure/db/syncservice.dart';
 import '../../infrastructure/subscription/subscribable.dart';
+import '../../infrastructure/modularity/inject.dart';
 
 class SyncModel with Subscribable {
   Function(SyncStatus)? onStatusChanged;
 
-  final SyncService _sync = SyncService();
+  final sync = Inject<SyncService>();
 
   SyncModel({
     this.onStatusChanged,
   });
 
   void init() async {
-    _sync.statusChanged.onReceive(this, (v) {
+    sync().statusChanged.onReceive(this, (v) {
       onStatusChanged!(v);
     });
   }
@@ -20,9 +21,9 @@ class SyncModel with Subscribable {
     unsubscribe();
   }
 
-  SyncStatus status() => _sync.status;
+  SyncStatus status() => sync().status;
 
   void startSync() {
-    _sync.startSync();
+    sync().startSync();
   }
 }

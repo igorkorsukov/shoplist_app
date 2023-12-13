@@ -1,7 +1,8 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kors_yandexdisk_fs/yandexdisk_fs.dart';
+import '../modularity/injectable.dart';
 
-class CloudFS {
+class CloudFS with Injectable {
   final _token = dotenv.env['YA_DISK_DEV_TOKEN'] ?? '';
   late final _ydfs = YandexDiskFS('https://cloud-api.yandex.net', _token);
 

@@ -11,7 +11,7 @@ import 'shoplist/view/edit_screen.dart';
 // flutter build apk --split-per-abi
 
 void main() async {
-  //await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: ".env");
 
   final List<ModuleSetup> modules = [InfrastructureModule(), ShopListModule()];
   for (var m in modules) {
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
+    ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.green);
 
     return MaterialApp(
       title: 'Shoplist',

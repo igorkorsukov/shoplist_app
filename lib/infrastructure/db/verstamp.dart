@@ -1,6 +1,8 @@
+import '../modularity/injectable.dart';
+
 enum VerstampMode { timestamp, increment, fixed }
 
-class Verstamp {
+class Verstamp with Injectable {
   VerstampMode _mode = VerstampMode.timestamp;
   final int _startTS = DateTime(2022, 12, 22).millisecondsSinceEpoch;
   int _value = 0;
