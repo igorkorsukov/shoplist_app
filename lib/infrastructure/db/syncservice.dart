@@ -86,7 +86,7 @@ class SyncService with Subscribable, Injectable {
     _setStatus(SyncStatus.running);
     _nextStatus = SyncStatus.synced;
 
-    Set<ID> objectIDs = store().objectIDs();
+    Set<Id> objectIDs = store().objectIDs();
 
     try {
       assert(objectIDs.isNotEmpty);
@@ -109,7 +109,7 @@ class SyncService with Subscribable, Injectable {
     log("[Sync] sync finished");
   }
 
-  Future<void> _syncObject(ID objId) async {
+  Future<void> _syncObject(Id objId) async {
     // get remote object
     StoreObject? remoteObj;
     var bytes = await cloud().readFile('app:/shoplist/$objId.json', maybeNotExists: true);
@@ -159,10 +159,10 @@ class SyncService with Subscribable, Injectable {
     // actual merge
     res.obj = StoreObject(localObj.id);
 
-    Set<ID> unitedIDs = localObj.records.keys.toSet();
+    Set<Id> unitedIDs = localObj.records.keys.toSet();
     unitedIDs.addAll(remoteObj.records.keys);
 
-    for (ID id in unitedIDs) {
+    for (Id id in unitedIDs) {
       StoreRecord? lr = localObj.records[id];
       StoreRecord? rr = remoteObj.records[id];
 

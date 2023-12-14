@@ -12,12 +12,12 @@ import 'shoplist.dart';
 class ShopListRepository with Subscribable, Injectable {
   final String serviceName = "shoplist";
   final store = Inject<LocalStorage>();
-  final _listChanged = Channel2<ID, ShopList?>();
+  final _listChanged = Channel2<Id, ShopList?>();
   bool _inited = false;
 
   ShopListRepository();
 
-  Channel2<ID, ShopList?> listChanged() => _listChanged;
+  Channel2<Id, ShopList?> listChanged() => _listChanged;
 
   Future<void> init() async {
     if (_inited) {
@@ -33,7 +33,7 @@ class ShopListRepository with Subscribable, Injectable {
     });
   }
 
-  Future<ShopList> readShopList(ID listId) async {
+  Future<ShopList> readShopList(Id listId) async {
     StoreObject? obj = store().readObject(listId);
     if (obj == null) {
       return ShopList.empty();
@@ -49,7 +49,7 @@ class ShopListRepository with Subscribable, Injectable {
     _listChanged.send(list.id, list);
   }
 
-  ShopItem _itemFromJson(ID id, String payload) {
+  ShopItem _itemFromJson(Id id, String payload) {
     var jsn = json.decode(payload) as Map<String, dynamic>;
     return ShopItem(id, title: jsn['title'] as String, checked: jsn['checked'] as bool);
   }
@@ -81,8 +81,8 @@ class ShopListRepository with Subscribable, Injectable {
 
   StoreObject _toStoreObject(ShopList list) {
     StoreObject obj = StoreObject(list.id);
-    obj.add(StoreRecord(ID("name"), type: 'name', payload: list.name));
-    obj.add(StoreRecord(ID("comment"), type: 'comment', payload: list.comment));
+    obj.add(StoreRecord(Id("name"), type: 'name', payload: list.name));
+    obj.add(StoreRecord(Id("comment"), type: 'comment', payload: list.comment));
     for (var it in list.items) {
       obj.add(StoreRecord(it.id, type: 'item', payload: _itemToJson(it)));
     }

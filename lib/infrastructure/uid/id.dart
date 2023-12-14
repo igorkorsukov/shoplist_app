@@ -1,11 +1,11 @@
-class ID {
+class Id {
   String _val = "";
 
-  ID([String v = ""]) {
+  Id([String v = ""]) {
     _val = v;
   }
 
-  ID.zero();
+  Id.zero();
 
   @override
   String toString() => _val;
@@ -14,7 +14,7 @@ class ID {
 
   @override
   bool operator ==(Object other) {
-    return other is ID && _val == other._val;
+    return other is Id && _val == other._val;
   }
 
   @override

@@ -19,5 +19,6 @@ class ShopListModule extends ModuleSetup {
   @override
   Future<void> onInit() async {
     await _repo.init();
+    _serv.init();
   }
 }

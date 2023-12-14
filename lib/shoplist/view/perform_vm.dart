@@ -7,7 +7,7 @@ import 'item_vm.dart';
 
 class ShopListModel with Subscribable {
   Function? onChanged;
-  ID listId = ID("shoplist");
+  Id listId = Id("shoplist");
 
   final serv = Inject<ShopListService>();
   final List<ShopItemV> _items = [];
@@ -57,17 +57,5 @@ class ShopListModel with Subscribable {
 
   List<ShopItemV> items() {
     return _items;
-  }
-
-  void checkItem(item, val) {
-    serv().checkItem(listId, item.id, val);
-  }
-
-  void removeDone() {
-    serv().removeDone(listId);
-  }
-
-  void removeAll() {
-    serv().removeAll(listId);
   }
 }

@@ -38,10 +38,10 @@ void main() {
   });
 
   test('write / read object', () async {
-    final ID obj1Id = ID("obj1");
-    final ID id_1 = ID("id_1");
-    final ID id_2 = ID("id_2");
-    final ID id_3 = ID("id_3");
+    final Id obj1Id = Id("obj1");
+    final Id id_1 = Id("id_1");
+    final Id id_2 = Id("id_2");
+    final Id id_3 = Id("id_3");
     StoreObject obj1_1 = StoreObject(obj1Id);
     obj1_1.records[id_1] = StoreRecord(id_1, type: "item", payload: "value1");
     obj1_1.records[id_2] = StoreRecord(id_2, type: "item", payload: "value2");

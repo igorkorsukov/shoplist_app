@@ -9,15 +9,15 @@ import 'storeobject.dart';
 
 class LocalStorage with Injectable {
   bool _inited = false;
-  final ID _objID = ID("object_ids"); // ID of internal object
-  Set<ID> _objectIDs = {};
-  final _objectChanged = Channel2<String, ID>();
+  final Id _objID = Id("object_ids"); // ID of internal object
+  Set<Id> _objectIDs = {};
+  final _objectChanged = Channel2<String, Id>();
   final driver = Inject<Driver>();
   final verstamp = Inject<Verstamp>();
 
   LocalStorage();
 
-  Channel2<String /*service*/, ID /*objID*/ > objectChanged() => _objectChanged;
+  Channel2<String /*service*/, Id /*objID*/ > objectChanged() => _objectChanged;
 
   Future<void> init() async {
     if (_inited) {
@@ -29,7 +29,7 @@ class LocalStorage with Injectable {
 
   Future<bool> clear() => driver().clear();
 
-  Set<ID> _readObjectIDs() {
+  Set<Id> _readObjectIDs() {
     var obj = readObject(_objID);
     if (obj == null) {
       return {_objID};
@@ -44,7 +44,7 @@ class LocalStorage with Injectable {
     return _objectIDs;
   }
 
-  void _writeObjectIDs(Set<ID> ids) {
+  void _writeObjectIDs(Set<Id> ids) {
     var obj = StoreObject(_objID);
     for (var id in ids) {
       obj.add(StoreRecord(id));
@@ -52,14 +52,14 @@ class LocalStorage with Injectable {
     writeObject("localstore", obj);
   }
 
-  Set<ID> objectIDs() {
+  Set<Id> objectIDs() {
     if (_objectIDs.isEmpty) {
       _objectIDs = _readObjectIDs();
     }
     return _objectIDs;
   }
 
-  StoreObject? readObject(ID objId, {bool deleted = false}) {
+  StoreObject? readObject(Id objId, {bool deleted = false}) {
     String? raw = driver().readString(objId.toString());
     if (raw == null) {
       return null;
@@ -88,10 +88,10 @@ class LocalStorage with Injectable {
       }
       // update object
       else {
-        Set<ID> unitedIDs = currentObj.records.keys.toSet();
+        Set<Id> unitedIDs = currentObj.records.keys.toSet();
         unitedIDs.addAll(obj.records.keys);
 
-        for (ID id in unitedIDs) {
+        for (Id id in unitedIDs) {
           StoreRecord? cr = currentObj.records[id];
           StoreRecord? nr = obj.records[id];
 

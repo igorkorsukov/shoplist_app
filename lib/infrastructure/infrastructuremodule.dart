@@ -5,11 +5,13 @@ import 'db/verstamp.dart';
 import 'db/localstorage.dart';
 import 'db/syncservice.dart';
 import 'db/cloudfs.dart';
+import 'action/dispatcher.dart';
 
 class InfrastructureModule extends ModuleSetup {
   final _driver = Driver();
   final _store = LocalStorage();
   final _sync = SyncService();
+  final _dispatcher = ActionsDispatcher();
 
   @override
   String moduleName() => "infrastructure";
@@ -21,6 +23,7 @@ class InfrastructureModule extends ModuleSetup {
     ioc().reg<LocalStorage>(_store);
     ioc().reg<CloudFS>(CloudFS());
     ioc().reg<SyncService>(_sync);
+    ioc().reg<ActionsDispatcher>(_dispatcher);
   }
 
   @override

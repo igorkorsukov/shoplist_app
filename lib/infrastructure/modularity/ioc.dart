@@ -5,8 +5,8 @@ IoC ioc() => IoC.instance();
 class IoC {
   static IoC instance() => IoC._instance;
 
-  void reg<T>(T p) {
-    _doReg(T, p as Injectable);
+  void reg<T>(Injectable p) {
+    _doReg(T, p);
   }
 
   void unreg<T>() {

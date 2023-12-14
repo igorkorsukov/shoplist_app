@@ -1,14 +1,14 @@
 import '../../infrastructure/uid/id.dart';
 
 class ShopItem {
-  ID id = ID();
+  Id id = Id();
   String title = "";
   bool checked = false;
   ShopItem(this.id, {this.title = "", this.checked = false});
 }
 
 class ShopList {
-  ID id = ID();
+  Id id = Id();
   String name = "";
   String comment = "";
   List<ShopItem> items = [];

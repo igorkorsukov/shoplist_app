@@ -1,19 +1,23 @@
 import 'dart:developer';
+import 'package:shoplist/shoplist/actions.dart';
+
 import 'item_vm.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/uid/id.dart';
+import '../../infrastructure/uid/uidgen.dart';
 import '../../infrastructure/modularity/inject.dart';
-import '../services/shoplist.dart';
+import '../../infrastructure/action/dispatcher.dart';
 import '../services/shoplistservice.dart';
 
 class EditItemModel with Subscribable {
-  final ID referenceID = ID("reference");
-  ID editListId = ID("shoplist");
+  final Id referenceID = Id("reference");
+  Id editListId = Id("shoplist");
   Function? onChanged;
 
   final serv = Inject<ShopListService>();
+  final dispatcher = Inject<ActionsDispatcher>();
   final List<ShopItemV> _reference = [];
-  final Set<ID> _current = {};
+  final Set<Id> _current = {};
   final List<ShopItemV> _filtered = [];
   String _searchString = "";
   ShopItemV? _newItem;
@@ -97,7 +101,7 @@ class EditItemModel with Subscribable {
     _resort(_filtered);
 
     if (_searchString.isNotEmpty && needAddNew) {
-      _newItem = ShopItemV(ID(""), title: _searchString);
+      _newItem = ShopItemV(Id(""), title: _searchString);
       _filtered.add(_newItem!);
     }
 
@@ -110,20 +114,19 @@ class EditItemModel with Subscribable {
   }
 
   void changeItem(ShopItemV item, bool isAdd) async {
-    ID addID = ID();
+    Id itemId = Id();
     if (_newItem == item) {
       _newItem = null;
-      addID = await serv().addItem(referenceID, ShopItem(ID(""), title: item.title, checked: isAdd));
+      itemId = UIDGen.newID();
+      dispatcher().dispatch(addItem(referenceID, itemId, item.title, isAdd));
     } else {
-      addID = item.id;
+      itemId = item.id;
     }
 
     if (isAdd) {
-      await serv().addItem(editListId, ShopItem(addID, title: item.title, checked: false));
+      dispatcher().dispatch(addItem(editListId, itemId, item.title, false));
     } else {
-      await serv().removeItem(editListId, item.id);
+      dispatcher().dispatch(removeItem(editListId, itemId));
     }
-
-    _update();
   }
 }

@@ -3,7 +3,7 @@ import '../uid/id.dart';
 
 class StoreRecord {
   int verstamp = 0;
-  ID id = ID();
+  Id id = Id();
   String type = "";
   String payload = "";
   bool deleted = false;
@@ -28,7 +28,7 @@ class StoreRecord {
     StoreRecord r = StoreRecord.empty();
     r.verstamp = data['verstamp'] as int;
     r.type = data['type'] as String;
-    r.id = ID(data['id'] as String);
+    r.id = Id(data['id'] as String);
     r.payload = data['payload'] as String;
     r.deleted = data['deleted'] as bool;
     return r;
@@ -46,8 +46,8 @@ class StoreRecord {
 }
 
 class StoreObject {
-  ID id = ID();
-  Map<ID, StoreRecord> records = {};
+  Id id = Id();
+  Map<Id, StoreRecord> records = {};
 
   StoreObject(this.id);
 
@@ -63,7 +63,7 @@ class StoreObject {
     records[r.id] = r;
   }
 
-  factory StoreObject.fromJson(ID objId, List<dynamic> records, {bool deleted = false}) {
+  factory StoreObject.fromJson(Id objId, List<dynamic> records, {bool deleted = false}) {
     StoreObject obj = StoreObject(objId);
     for (var rd in records) {
       var r = StoreRecord.fromJson(rd as Map<String, dynamic>);

@@ -31,7 +31,7 @@ class _AddItemScreen extends State<EditListScreen> {
       _model.search(_searchController.text);
     });
 
-    _model.editListId = widget.args!["listId"] as ID;
+    _model.editListId = widget.args!["listId"] as Id;
     _model.init();
   }
 

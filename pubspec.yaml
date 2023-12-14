@@ -100,3 +100,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+linter:
+  rules:
+    constant_identifier_names: false

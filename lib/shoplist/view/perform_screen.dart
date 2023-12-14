@@ -1,8 +1,11 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:shoplist/shoplist/actions.dart';
+import '../../infrastructure/modularity/inject.dart';
+import '../../infrastructure/action/dispatcher.dart';
+import '../../sync/view/sync_button.dart';
 import 'perform_vm.dart';
 import 'perform_item.dart';
-import '../../sync/view/sync_button.dart';
 
 class ShopListScreen extends StatefulWidget {
   const ShopListScreen({super.key});
@@ -13,6 +16,7 @@ class ShopListScreen extends StatefulWidget {
 
 class _ShopListState extends State<ShopListScreen> {
   final model = ShopListModel();
+  final dispatcher = Inject<ActionsDispatcher>();
 
   @override
   void initState() {
@@ -31,16 +35,16 @@ class _ShopListState extends State<ShopListScreen> {
 
   void menuClicked(String val) {
     switch (val) {
-      case 'edititems':
+      case 'edit_items':
         Navigator.pushNamed(context, '/edititems', arguments: <String, dynamic>{
           'listId': model.listId,
         });
         break;
       case 'remove_done':
-        model.removeDone();
+        dispatcher().dispatch(removeDoneAction(model.listId));
         break;
       case 'remove_all':
-        model.removeAll();
+        dispatcher().dispatch(removeAllAction(model.listId));
         break;
     }
   }
@@ -57,7 +61,7 @@ class _ShopListState extends State<ShopListScreen> {
           PopupMenuButton<String>(
             onSelected: (item) => menuClicked(item),
             itemBuilder: (context) => [
-              const PopupMenuItem<String>(value: 'edititems', child: Text('Изменить')),
+              const PopupMenuItem<String>(value: 'edit_items', child: Text('Изменить')),
               const PopupMenuItem<String>(value: 'remove_done', child: Text('Очистить выполненые')),
               const PopupMenuItem<String>(value: 'remove_all', child: Text('Очистить всё')),
             ],
@@ -71,7 +75,7 @@ class _ShopListState extends State<ShopListScreen> {
             ShopListItem(
                 item: item,
                 onCheckedChanged: (val) {
-                  model.checkItem(item, val);
+                  dispatcher().dispatch(checkItem(model.listId, item.id, val!));
                 }),
         ],
       )),

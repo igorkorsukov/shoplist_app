@@ -4,7 +4,7 @@ import 'id.dart';
 class UIDGen {
   static final _uuid = Uuid();
 
-  static ID newID() {
-    return ID(_uuid.v1());
+  static Id newID() {
+    return Id(_uuid.v1());
   }
 }
