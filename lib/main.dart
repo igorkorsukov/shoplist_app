@@ -23,7 +23,7 @@ void main() async {
   }
 
   for (var m in modules) {
-    m.onInit();
+    await m.onInit();
   }
 
   runApp(const MyApp());

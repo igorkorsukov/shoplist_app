@@ -4,7 +4,8 @@ import 'package:shoplist/shoplist/actions.dart';
 import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/action/dispatcher.dart';
 import '../../sync/view/sync_button.dart';
-import 'perform_vm.dart';
+import '../../appshell/view/main_drawer.dart';
+import 'perform_model.dart';
 import 'perform_item.dart';
 
 class ShopListScreen extends StatefulWidget {
@@ -68,6 +69,7 @@ class _ShopListState extends State<ShopListScreen> {
           ),
         ],
       ),
+      drawer: const MainDrawer(),
       body: Center(
           child: ListView(
         children: [

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shoplist/infrastructure/db/syncservice.dart';
-import 'sync_vm.dart';
+import 'sync_model.dart';
 
 class SyncButton extends StatefulWidget {
   const SyncButton({super.key});
@@ -31,11 +31,11 @@ class _SyncButton extends State<SyncButton> {
   IconData iconByStatus(s) {
     switch (s) {
       case SyncStatus.notsynced:
-        return Icons.sync_problem;
+        return Icons.cloud_queue;
       case SyncStatus.running:
-        return Icons.swap_vert_circle;
+        return Icons.cloud_sync;
       case SyncStatus.synced:
-        return Icons.sync;
+        return Icons.cloud_done;
     }
 
     return Icons.sync_problem;

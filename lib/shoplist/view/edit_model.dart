@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:shoplist/shoplist/actions.dart';
 
-import 'item_vm.dart';
+import 'item_model.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/uid/id.dart';
 import '../../infrastructure/uid/uidgen.dart';

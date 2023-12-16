@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../infrastructure/uid/id.dart';
-import 'edit_vm.dart';
+import 'edit_model.dart';
 import 'edit_item.dart';
 import '../../sync/view/sync_button.dart';
 
