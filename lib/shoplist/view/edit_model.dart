@@ -10,7 +10,7 @@ import '../../infrastructure/action/dispatcher.dart';
 import '../services/shoplistservice.dart';
 
 class EditItemModel with Subscribable {
-  final Id referenceID = Id("reference");
+  final Id referenceId = Id("reference");
   Id editListId = Id("shoplist");
   Function? onChanged;
 
@@ -37,14 +37,14 @@ class EditItemModel with Subscribable {
   }
 
   void init() async {
-    var list = await serv().readShopList(referenceID);
+    var list = await serv().readShopList(referenceId);
     _makeItems(list);
 
     list = await serv().readShopList(editListId);
     _makeCurrent(list);
 
     serv().listChanged().onReceive(this, (name, list) async {
-      if (name == referenceID) {
+      if (name == referenceId) {
         list = list ?? await serv().readShopList(name);
         _makeItems(list);
       }
@@ -118,7 +118,7 @@ class EditItemModel with Subscribable {
     if (_newItem == item) {
       _newItem = null;
       itemId = UIDGen.newID();
-      dispatcher().dispatch(addItem(referenceID, itemId, item.title, isAdd));
+      dispatcher().dispatch(addItem(referenceId, itemId, item.title, isAdd));
     } else {
       itemId = item.id;
     }

@@ -13,16 +13,30 @@ class ShopListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CheckboxListTile(
+    // return CheckboxListTile(
+    //     controlAffinity: ListTileControlAffinity.leading,
+    //     title: Text(
+    //       item.title,
+    //       style: TextStyle(
+    //         decoration: item.checked ? TextDecoration.lineThrough : TextDecoration.none,
+    //       ),
+    //     ),
+    //     value: item.checked,
+    //     onChanged: (val) {
+    //       Future.delayed(const Duration(milliseconds: 250), () => onCheckedChanged(val));
+    //     });
+
+    return ListTile(
+        //controlAffinity: ListTileControlAffinity.leading,
         title: Text(
           item.title,
           style: TextStyle(
             decoration: item.checked ? TextDecoration.lineThrough : TextDecoration.none,
           ),
         ),
-        value: item.checked,
-        onChanged: (val) {
-          Future.delayed(const Duration(milliseconds: 250), () => onCheckedChanged(val));
+        //value: item.checked,
+        onTap: () {
+          Future.delayed(const Duration(milliseconds: 250), () => onCheckedChanged(!item.checked));
         });
   }
 }

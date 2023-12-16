@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shoplist/shoplist/actions.dart';
 import '../../infrastructure/uid/id.dart';
+import '../../infrastructure/modularity/inject.dart';
+import '../../infrastructure/action/dispatcher.dart';
 import 'edit_model.dart';
 import 'edit_item.dart';
 import '../../sync/view/sync_button.dart';
@@ -18,6 +21,7 @@ class EditListScreen extends StatefulWidget {
 
 class _AddItemScreen extends State<EditListScreen> {
   final _model = EditItemModel();
+  final dispatcher = Inject<ActionsDispatcher>();
   final _searchController = TextEditingController();
 
   @override
@@ -70,11 +74,15 @@ class _AddItemScreen extends State<EditListScreen> {
         children: [
           for (var item in items)
             AddItem(
-                item: item,
-                onCheckedChanged: (val) {
-                  _model.changeItem(item, val!);
-                  _searchController.clear();
-                }),
+              item: item,
+              onCheckedChanged: (val) {
+                _model.changeItem(item, val!);
+                _searchController.clear();
+              },
+              onDeleteClicked: () {
+                dispatcher().dispatch(removeItem(_model.referenceId, item.id));
+              },
+            ),
         ],
       ),
     );
