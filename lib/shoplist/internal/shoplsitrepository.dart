@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'dart:convert';
 import '../../infrastructure/db/localstorage.dart';
 import '../../infrastructure/db/storeobject.dart';
-import '../../infrastructure/uid/id.dart';
+import '../../infrastructure/uid/uid.dart';
 import '../../infrastructure/subscription/channel.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/modularity/injectable.dart';
@@ -15,12 +15,12 @@ class ShopListRepository with Subscribable, Injectable {
 
   final String serviceName = "shoplist";
   final store = Inject<LocalStorage>();
-  final _listChanged = Channel2<Id, ShopList?>();
+  final _listChanged = Channel2<Uid, ShopList?>();
   bool _inited = false;
 
   ShopListRepository();
 
-  Channel2<Id, ShopList?> listChanged() => _listChanged;
+  Channel2<Uid, ShopList?> listChanged() => _listChanged;
 
   Future<void> init() async {
     if (_inited) {
@@ -36,7 +36,7 @@ class ShopListRepository with Subscribable, Injectable {
     });
   }
 
-  Future<ShopList> readShopList(Id listId) async {
+  Future<ShopList> readShopList(Uid listId) async {
     StoreObject? obj = store().readObject(listId);
     if (obj == null) {
       return ShopList.empty();
@@ -52,11 +52,11 @@ class ShopListRepository with Subscribable, Injectable {
     _listChanged.send(list.id, list);
   }
 
-  ShopItem _itemFromJson(Id id, String payload) {
+  ShopItem _itemFromJson(Uid id, String payload) {
     var jsn = json.decode(payload) as Map<String, dynamic>;
-    var categoryId = Id.invalid;
+    var categoryId = Uid.invalid;
     if (jsn['categoryId'] != null) {
-      categoryId = Id(jsn['categoryId'] as String);
+      categoryId = Uid.fromString(jsn['categoryId'] as String);
     }
     return ShopItem(id, categoryId: categoryId, title: jsn['title'] as String, checked: jsn['checked'] as bool);
   }
@@ -89,8 +89,8 @@ class ShopListRepository with Subscribable, Injectable {
 
   StoreObject _toStoreObject(ShopList list) {
     StoreObject obj = StoreObject(list.id);
-    obj.add(StoreRecord(const Id("name"), type: 'name', payload: list.name));
-    obj.add(StoreRecord(const Id("comment"), type: 'comment', payload: list.comment));
+    obj.add(StoreRecord(const Uid(STORE_ID_TYPE, "name"), type: 'name', payload: list.name));
+    obj.add(StoreRecord(const Uid(STORE_ID_TYPE, "comment"), type: 'comment', payload: list.comment));
     for (var it in list.items) {
       obj.add(StoreRecord(it.id, type: 'item', payload: _itemToJson(it)));
     }

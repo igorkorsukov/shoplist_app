@@ -1,10 +1,10 @@
 import 'package:uuid/uuid.dart';
-import 'id.dart';
+import 'uid.dart';
 
 class UIDGen {
   static final _uuid = Uuid();
 
-  static Id newID() {
-    return Id(_uuid.v1());
+  static Uid newID(String type) {
+    return Uid(type, _uuid.v1());
   }
 }

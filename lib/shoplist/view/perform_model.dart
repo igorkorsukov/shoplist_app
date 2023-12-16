@@ -1,15 +1,16 @@
 import 'dart:developer';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/modularity/inject.dart';
-import '../../infrastructure/uid/id.dart';
-import '../internal/shoplistservice.dart';
+import '../../infrastructure/uid/uid.dart';
+import '../ishoplistservice.dart';
+import '../types.dart';
 import 'item_model.dart';
 
 class ShopListModel with Subscribable {
   Function? onChanged;
-  Id listId = const Id("shoplist");
+  Uid listId = const Uid(LIST_ID_TYPE, "shoplist");
 
-  final serv = Inject<ShopListService>();
+  final serv = Inject<IShopListService>();
   final List<ShopItemV> _items = [];
 
   ShopListModel({
@@ -24,7 +25,7 @@ class ShopListModel with Subscribable {
   }
 
   void init() async {
-    serv().readShopList(listId).then((list) {
+    serv().shopList(listId).then((list) {
       _makeItems(list);
       _resort();
       onChanged!();
@@ -35,7 +36,7 @@ class ShopListModel with Subscribable {
         return;
       }
 
-      list = list ?? await serv().readShopList(listId);
+      list = list ?? await serv().shopList(listId);
       _makeItems(list);
       _resort();
       onChanged!();

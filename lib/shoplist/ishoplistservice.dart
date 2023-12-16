@@ -1,20 +1,27 @@
 import 'package:shoplist/infrastructure/modularity/injectable.dart';
 import 'package:shoplist/infrastructure/subscription/channel.dart';
-import 'package:shoplist/infrastructure/uid/id.dart';
+import 'package:shoplist/infrastructure/uid/uid.dart';
 import 'types.dart';
 
 abstract class IShopListService with Injectable {
   @override
   String interfaceId() => "IShopListService";
 
-  Channel2<Id, ShopList?> listChanged();
+  // lists
+  Channel2<Uid, ShopList?> listChanged();
 
-  Future<ShopList> readShopList(name);
+  Future<ShopList> shopList(Uid listId);
 
-  Future<void> addItem(Id listID, ShopItem item);
-  Future<void> checkItem(Id listId, Id itemId, bool val);
-  Future<void> removeItem(Id listId, Id itemId);
+  Future<void> addItem(Uid listId, ShopItem item);
+  Future<void> checkItem(Uid listId, Uid itemId, bool val);
+  Future<void> removeItem(Uid listId, Uid itemId);
 
-  Future<void> removeDone(Id listId);
-  Future<void> removeAll(Id listId);
+  Future<void> removeDone(Uid listId);
+  Future<void> removeAll(Uid listId);
+
+  // categories
+  Channel<Categories?> categoriesChanged();
+  Future<Categories> categories();
+  Future<void> addCategory(Category catg);
+  Future<void> removeCategory(Uid catgId);
 }

@@ -4,7 +4,7 @@ import 'package:shoplist/infrastructure/subscription/subscribable.dart';
 
 import 'package:shoplist/infrastructure/db/localstorage.dart';
 import 'package:shoplist/infrastructure/db/storeobject.dart';
-import 'package:shoplist/infrastructure/uid/id.dart';
+import 'package:shoplist/infrastructure/uid/uid.dart';
 
 import 'mocks/driver_mock.dart';
 
@@ -14,15 +14,15 @@ import 'mocks/driver_mock.dart';
 class ObjectChangedSubscribable with Subscribable {
   int triggered = 0;
   String service = "";
-  Id objectId = Id.invalid;
+  Uid objectId = Uid.invalid;
 
   void clear() {
     triggered = 0;
     service = "";
-    objectId = Id.invalid;
+    objectId = Uid.invalid;
   }
 
-  void onTriggered(String serv, Id objId) {
+  void onTriggered(String serv, Uid objId) {
     triggered += 1;
     service = serv;
     objectId = objId;
@@ -42,10 +42,10 @@ void main() {
   });
 
   test('write / read object', () {
-    final Id obj1 = Id("obj1");
-    final Id id_1 = Id("id_1");
-    final Id id_2 = Id("id_2");
-    final Id id_3 = Id("id_3");
+    const Uid obj1 = Uid(STORE_ID_TYPE, "obj1");
+    const Uid id_1 = Uid(STORE_ID_TYPE, "id_1");
+    const Uid id_2 = Uid(STORE_ID_TYPE, "id_2");
+    const Uid id_3 = Uid(STORE_ID_TYPE, "id_3");
     StoreObject obj = StoreObject(obj1);
     obj.add(StoreRecord(id_1, type: "item", payload: "value1"));
     obj.records[id_2] = StoreRecord(id_2, type: "item", payload: "value2");
@@ -147,9 +147,9 @@ void main() {
   });
 
   test('object changed notify', () async {
-    final Id obj1 = Id("obj1");
-    final Id id_1 = Id("id_1");
-    final Id id_2 = Id("id_2");
+    const Uid obj1 = Uid(STORE_ID_TYPE, "obj1");
+    const Uid id_1 = Uid(STORE_ID_TYPE, "id_1");
+    const Uid id_2 = Uid(STORE_ID_TYPE, "id_2");
     StoreObject obj = StoreObject(obj1);
     obj.records[id_1] = StoreRecord(id_1, type: "item", payload: "value1");
     obj.records[id_2] = StoreRecord(id_2, type: "item", payload: "value2");

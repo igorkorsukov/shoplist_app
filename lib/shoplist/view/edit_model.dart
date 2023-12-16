@@ -3,21 +3,22 @@ import 'package:shoplist/shoplist/actions.dart';
 
 import 'item_model.dart';
 import '../../infrastructure/subscription/subscribable.dart';
-import '../../infrastructure/uid/id.dart';
+import '../../infrastructure/uid/uid.dart';
 import '../../infrastructure/uid/uidgen.dart';
 import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/action/dispatcher.dart';
-import '../internal/shoplistservice.dart';
+import '../ishoplistservice.dart';
+import '../types.dart';
 
 class EditItemModel with Subscribable {
-  final Id referenceId = const Id("reference");
-  Id editListId = const Id("shoplist");
+  final Uid referenceId = const Uid(LIST_ID_TYPE, "reference");
+  Uid editListId = Uid.invalid;
   Function? onChanged;
 
-  final serv = Inject<ShopListService>();
+  final serv = Inject<IShopListService>();
   final dispatcher = Inject<ActionsDispatcher>();
   final List<ShopItemV> _reference = [];
-  final Set<Id> _current = {};
+  final Set<Uid> _current = {};
   final List<ShopItemV> _filtered = [];
   String _searchString = "";
   ShopItemV? _newItem;
@@ -37,20 +38,20 @@ class EditItemModel with Subscribable {
   }
 
   void init() async {
-    var list = await serv().readShopList(referenceId);
+    var list = await serv().shopList(referenceId);
     _makeItems(list);
 
-    list = await serv().readShopList(editListId);
+    list = await serv().shopList(editListId);
     _makeCurrent(list);
 
     serv().listChanged().onReceive(this, (name, list) async {
       if (name == referenceId) {
-        list = list ?? await serv().readShopList(name);
+        list = list ?? await serv().shopList(name);
         _makeItems(list);
       }
 
       if (name == editListId) {
-        list = list ?? await serv().readShopList(name);
+        list = list ?? await serv().shopList(name);
         _makeCurrent(list);
       }
 
@@ -101,7 +102,7 @@ class EditItemModel with Subscribable {
     _resort(_filtered);
 
     if (_searchString.isNotEmpty && needAddNew) {
-      _newItem = ShopItemV(Id.invalid, title: _searchString);
+      _newItem = ShopItemV(Uid.invalid, title: _searchString);
       _filtered.add(_newItem!);
     }
 
@@ -114,10 +115,10 @@ class EditItemModel with Subscribable {
   }
 
   void changeItem(ShopItemV item, bool isAdd) async {
-    Id itemId = Id.invalid;
+    Uid itemId = Uid.invalid;
     if (_newItem == item) {
       _newItem = null;
-      itemId = UIDGen.newID();
+      itemId = UIDGen.newID(LIST_ID_TYPE);
       dispatcher().dispatch(addItem(referenceId, itemId, item.title, isAdd));
     } else {
       itemId = item.id;

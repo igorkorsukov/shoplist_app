@@ -1,6 +1,6 @@
 import 'dart:convert';
 import '../subscription/channel.dart';
-import '../uid/id.dart';
+import '../uid/uid.dart';
 import '../modularity/injectable.dart';
 import '../modularity/inject.dart';
 import 'driver.dart';
@@ -12,15 +12,15 @@ class LocalStorage with Injectable {
   String interfaceId() => "ILocalStorage";
 
   bool _inited = false;
-  final Id _objID = const Id("object_ids"); // ID of internal object
-  Set<Id> _objectIDs = {};
-  final _objectChanged = Channel2<String, Id>();
+  final Uid _objID = const Uid(STORE_ID_TYPE, "object_ids"); // ID of internal object
+  Set<Uid> _objectIDs = {};
+  final _objectChanged = Channel2<String, Uid>();
   final driver = Inject<Driver>();
   final verstamp = Inject<Verstamp>();
 
   LocalStorage();
 
-  Channel2<String /*service*/, Id /*objID*/ > objectChanged() => _objectChanged;
+  Channel2<String /*service*/, Uid /*objID*/ > objectChanged() => _objectChanged;
 
   Future<void> init() async {
     if (_inited) {
@@ -32,7 +32,7 @@ class LocalStorage with Injectable {
 
   Future<bool> clear() => driver().clear();
 
-  Set<Id> _readObjectIDs() {
+  Set<Uid> _readObjectIDs() {
     var obj = readObject(_objID);
     if (obj == null) {
       return {_objID};
@@ -47,7 +47,7 @@ class LocalStorage with Injectable {
     return _objectIDs;
   }
 
-  void _writeObjectIDs(Set<Id> ids) {
+  void _writeObjectIDs(Set<Uid> ids) {
     var obj = StoreObject(_objID);
     for (var id in ids) {
       obj.add(StoreRecord(id));
@@ -55,14 +55,14 @@ class LocalStorage with Injectable {
     writeObject("localstore", obj);
   }
 
-  Set<Id> objectIDs() {
+  Set<Uid> objectIDs() {
     if (_objectIDs.isEmpty) {
       _objectIDs = _readObjectIDs();
     }
     return _objectIDs;
   }
 
-  StoreObject? readObject(Id objId, {bool deleted = false}) {
+  StoreObject? readObject(Uid objId, {bool deleted = false}) {
     String? raw = driver().readString(objId.toString());
     if (raw == null) {
       return null;
@@ -91,10 +91,10 @@ class LocalStorage with Injectable {
       }
       // update object
       else {
-        Set<Id> unitedIDs = currentObj.records.keys.toSet();
+        Set<Uid> unitedIDs = currentObj.records.keys.toSet();
         unitedIDs.addAll(obj.records.keys);
 
-        for (Id id in unitedIDs) {
+        for (Uid id in unitedIDs) {
           StoreRecord? cr = currentObj.records[id];
           StoreRecord? nr = obj.records[id];
 

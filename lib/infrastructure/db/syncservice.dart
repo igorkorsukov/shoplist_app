@@ -4,7 +4,7 @@ import 'dart:async';
 
 import '../subscription/subscribable.dart';
 import '../subscription/channel.dart';
-import '../uid/id.dart';
+import '../uid/uid.dart';
 import '../modularity/inject.dart';
 import '../modularity/injectable.dart';
 import 'cloudfs.dart';
@@ -89,7 +89,7 @@ class SyncService with Subscribable, Injectable {
     _setStatus(SyncStatus.running);
     _nextStatus = SyncStatus.synced;
 
-    Set<Id> objectIDs = store().objectIDs();
+    Set<Uid> objectIDs = store().objectIDs();
 
     try {
       assert(objectIDs.isNotEmpty);
@@ -112,7 +112,7 @@ class SyncService with Subscribable, Injectable {
     log("[Sync] sync finished");
   }
 
-  Future<void> _syncObject(Id objId) async {
+  Future<void> _syncObject(Uid objId) async {
     // get remote object
     StoreObject? remoteObj;
     var bytes = await cloud().readFile('app:/shoplist/$objId.json', maybeNotExists: true);
@@ -162,10 +162,10 @@ class SyncService with Subscribable, Injectable {
     // actual merge
     res.obj = StoreObject(localObj.id);
 
-    Set<Id> unitedIDs = localObj.records.keys.toSet();
+    Set<Uid> unitedIDs = localObj.records.keys.toSet();
     unitedIDs.addAll(remoteObj.records.keys);
 
-    for (Id id in unitedIDs) {
+    for (Uid id in unitedIDs) {
       StoreRecord? lr = localObj.records[id];
       StoreRecord? rr = remoteObj.records[id];
 

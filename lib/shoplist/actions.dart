@@ -1,14 +1,14 @@
 import '../infrastructure/action/action.dart';
-import '../infrastructure/uid/id.dart';
+import '../infrastructure/uid/uid.dart';
 
-Action addItem(Id listId, Id itemId, String title, [bool checked = false]) =>
+Action addItem(Uid listId, Uid itemId, String title, [bool checked = false]) =>
     makeAction("add_item", {"listId": listId, "itemId": itemId, "title": title, "checked": checked});
 
-Action removeItem(Id listId, Id itemId) => makeAction("remove_item", {"listId": listId, "itemId": itemId});
+Action removeItem(Uid listId, Uid itemId) => makeAction("remove_item", {"listId": listId, "itemId": itemId});
 
-Action checkItem(Id listId, Id itemId, bool val) =>
+Action checkItem(Uid listId, Uid itemId, bool val) =>
     makeAction("check_item", {"listId": listId, "itemId": itemId, "val": val});
 
-Action removeDoneAction(Id listId) => makeAction("remove_done", {"listId": listId});
+Action removeDoneAction(Uid listId) => makeAction("remove_done", {"listId": listId});
 
-Action removeAllAction(Id listId) => makeAction("remove_all", {"listId": listId});
+Action removeAllAction(Uid listId) => makeAction("remove_all", {"listId": listId});

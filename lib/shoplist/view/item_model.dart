@@ -1,7 +1,7 @@
-import '../../infrastructure/uid/id.dart';
+import '../../infrastructure/uid/uid.dart';
 
 class ShopItemV {
-  Id id = Id.invalid;
+  Uid id = Uid.invalid;
   String title = "";
   bool checked = false;
   ShopItemV(this.id, {this.title = "", this.checked = false});

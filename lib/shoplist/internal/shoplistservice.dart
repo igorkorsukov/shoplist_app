@@ -1,4 +1,4 @@
-import '../../infrastructure/uid/id.dart';
+import '../../infrastructure/uid/uid.dart';
 import '../../infrastructure/subscription/channel.dart';
 import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/action/dispatcher.dart';
@@ -14,65 +14,96 @@ class ShopListService extends IShopListService with Actionable {
 
   void init() {
     dispatcher().reg(this, "add_item", (Action act) {
-      addItem(act.args["listId"] as Id,
-          ShopItem(act.args["itemId"] as Id, title: act.args["title"], checked: act.args["checked"]));
+      addItem(act.args["listId"] as Uid,
+          ShopItem(act.args["itemId"] as Uid, title: act.args["title"], checked: act.args["checked"]));
     });
 
     dispatcher().reg(this, "remove_item", (Action act) {
-      removeItem(act.args["listId"] as Id, act.args["itemId"] as Id);
+      removeItem(act.args["listId"] as Uid, act.args["itemId"] as Uid);
     });
 
     dispatcher().reg(this, "check_item", (Action act) {
-      checkItem(act.args["listId"] as Id, act.args["itemId"] as Id, act.args["val"] as bool);
+      checkItem(act.args["listId"] as Uid, act.args["itemId"] as Uid, act.args["val"] as bool);
     });
 
     dispatcher().reg(this, "remove_done", (Action act) {
-      removeDone(act.args["listId"] as Id);
+      removeDone(act.args["listId"] as Uid);
     });
 
     dispatcher().reg(this, "remove_all", (Action act) {
-      removeAll(act.args["listId"] as Id);
+      removeAll(act.args["listId"] as Uid);
     });
   }
 
-  Channel2<Id, ShopList?> listChanged() => repo().listChanged();
+  @override
+  Channel2<Uid, ShopList?> listChanged() => repo().listChanged();
 
-  Future<ShopList> readShopList(name) async {
-    return repo().readShopList(name);
+  @override
+  Future<ShopList> shopList(Uid listId) async {
+    return repo().readShopList(listId);
   }
 
-  Future<void> checkItem(Id listId, Id itemId, bool val) async {
+  @override
+  Future<void> checkItem(Uid listId, Uid itemId, bool val) async {
     ShopList list = await repo().readShopList(listId);
     ShopItem item = list.items.firstWhere((e) => e.id == itemId);
     item.checked = val;
     repo().writeShopList(list);
   }
 
-  Future<void> removeDone(Id listId) async {
+  @override
+  Future<void> removeDone(Uid listId) async {
     ShopList list = await repo().readShopList(listId);
     list.items.removeWhere((e) => e.checked == true);
     repo().writeShopList(list);
   }
 
-  Future<void> removeAll(Id listId) async {
+  @override
+  Future<void> removeAll(Uid listId) async {
     ShopList list = await repo().readShopList(listId);
     list.items.clear();
     repo().writeShopList(list);
   }
 
-  Future<void> addItem(Id listID, ShopItem item) async {
+  @override
+  Future<void> addItem(Uid listId, ShopItem item) async {
     assert(item.id.isValid());
 
-    ShopList list = await repo().readShopList(listID);
+    ShopList list = await repo().readShopList(listId);
+
+    //! NOTE Id maybe not valid, if list not found
+    list.id = listId;
 
     list.items.add(item);
 
     await repo().writeShopList(list);
   }
 
-  Future<void> removeItem(Id listId, Id itemId) async {
+  @override
+  Future<void> removeItem(Uid listId, Uid itemId) async {
     ShopList list = await repo().readShopList(listId);
     list.items.removeWhere((e) => e.id == itemId);
     repo().writeShopList(list);
+  }
+
+  // categories
+  @override
+  Channel<Categories?> categoriesChanged() {
+    return Channel<Categories?>();
+  }
+
+  @override
+  Future<Categories> categories() async {
+    return Future.value(Categories());
+  }
+
+  @override
+  Future<void> addCategory(Category catg) async {
+    return Future.value();
+  }
+
+  @override
+  Future<void> removeCategory(Uid catgId) async {
+    return Future.value();
   }
 }
