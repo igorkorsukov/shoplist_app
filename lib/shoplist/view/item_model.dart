@@ -1,7 +1,7 @@
 import '../../infrastructure/uid/id.dart';
 
 class ShopItemV {
-  Id id = Id();
+  Id id = Id.invalid;
   String title = "";
   bool checked = false;
   ShopItemV(this.id, {this.title = "", this.checked = false});

@@ -1,11 +1,9 @@
 class Id {
-  String _val = "";
+  static const Id invalid = Id("");
 
-  Id([String v = ""]) {
-    _val = v;
-  }
+  final String _val;
 
-  Id.zero();
+  const Id(this._val);
 
   @override
   String toString() => _val;

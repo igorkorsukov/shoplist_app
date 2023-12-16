@@ -14,12 +14,12 @@ import 'mocks/driver_mock.dart';
 class ObjectChangedSubscribable with Subscribable {
   int triggered = 0;
   String service = "";
-  Id objectId = Id();
+  Id objectId = Id.invalid;
 
   void clear() {
     triggered = 0;
     service = "";
-    objectId = Id();
+    objectId = Id.invalid;
   }
 
   void onTriggered(String serv, Id objId) {

@@ -3,7 +3,7 @@ import '../uid/id.dart';
 
 class StoreRecord {
   int verstamp = 0;
-  Id id = Id();
+  Id id = Id.invalid;
   String type = "";
   String payload = "";
   bool deleted = false;
@@ -46,7 +46,7 @@ class StoreRecord {
 }
 
 class StoreObject {
-  Id id = Id();
+  Id id = Id.invalid;
   Map<Id, StoreRecord> records = {};
 
   StoreObject(this.id);

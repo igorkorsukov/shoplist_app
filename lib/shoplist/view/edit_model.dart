@@ -114,7 +114,7 @@ class EditItemModel with Subscribable {
   }
 
   void changeItem(ShopItemV item, bool isAdd) async {
-    Id itemId = Id();
+    Id itemId = Id.invalid;
     if (_newItem == item) {
       _newItem = null;
       itemId = UIDGen.newID();

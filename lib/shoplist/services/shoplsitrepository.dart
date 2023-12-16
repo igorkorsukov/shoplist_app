@@ -51,11 +51,16 @@ class ShopListRepository with Subscribable, Injectable {
 
   ShopItem _itemFromJson(Id id, String payload) {
     var jsn = json.decode(payload) as Map<String, dynamic>;
-    return ShopItem(id, title: jsn['title'] as String, checked: jsn['checked'] as bool);
+    var categoryId = Id.invalid;
+    if (jsn['categoryId'] != null) {
+      categoryId = Id(jsn['categoryId'] as String);
+    }
+    return ShopItem(id, categoryId: categoryId, title: jsn['title'] as String, checked: jsn['checked'] as bool);
   }
 
   String _itemToJson(ShopItem item) {
     Map<String, dynamic> jsn = {
+      'categoryId': item.categoryId.toString(),
       'title': item.title,
       'checked': item.checked,
     };
@@ -81,8 +86,8 @@ class ShopListRepository with Subscribable, Injectable {
 
   StoreObject _toStoreObject(ShopList list) {
     StoreObject obj = StoreObject(list.id);
-    obj.add(StoreRecord(Id("name"), type: 'name', payload: list.name));
-    obj.add(StoreRecord(Id("comment"), type: 'comment', payload: list.comment));
+    obj.add(StoreRecord(const Id("name"), type: 'name', payload: list.name));
+    obj.add(StoreRecord(const Id("comment"), type: 'comment', payload: list.comment));
     for (var it in list.items) {
       obj.add(StoreRecord(it.id, type: 'item', payload: _itemToJson(it)));
     }
