@@ -1,4 +1,4 @@
-import '../../infrastructure/uid/id.dart';
+import '../infrastructure/uid/id.dart';
 
 class ShopItem {
   Id id = Id.invalid;

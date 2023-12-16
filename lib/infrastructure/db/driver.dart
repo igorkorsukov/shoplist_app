@@ -2,6 +2,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../modularity/injectable.dart';
 
 class Driver with Injectable {
+  @override
+  String interfaceId() => "IDriver";
+
   late SharedPreferences _prefs;
 
   Future<void> init(String prefix) async {

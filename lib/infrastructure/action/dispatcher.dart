@@ -8,6 +8,9 @@ mixin Actionable {}
 typedef ActionCallBack = void Function(Action action);
 
 class ActionsDispatcher with Injectable {
+  @override
+  String interfaceId() => "IActionsDispatcher";
+
   void reg(Actionable client, ActionCode code, ActionCallBack call) {
     _ActionRegistration r = _ActionRegistration(client, code, call);
     _registrations.add(r);

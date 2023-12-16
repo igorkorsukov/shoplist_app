@@ -1,1 +1,3 @@
-mixin Injectable {}
+mixin Injectable {
+  String interfaceId();
+}

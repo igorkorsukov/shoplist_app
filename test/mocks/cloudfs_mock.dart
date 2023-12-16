@@ -1,6 +1,6 @@
 import 'package:shoplist/infrastructure/db/cloudfs.dart';
 
-class CloudFSMock implements CloudFS {
+class CloudFSMock extends CloudFS {
   final Map<String, List<int>> data = {};
 
   @override

@@ -2,12 +2,12 @@ import 'dart:developer';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/uid/id.dart';
-import '../services/shoplistservice.dart';
+import '../internal/shoplistservice.dart';
 import 'item_model.dart';
 
 class ShopListModel with Subscribable {
   Function? onChanged;
-  Id listId = Id("shoplist");
+  Id listId = const Id("shoplist");
 
   final serv = Inject<ShopListService>();
   final List<ShopItemV> _items = [];

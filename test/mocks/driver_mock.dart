@@ -1,6 +1,6 @@
 import 'package:shoplist/infrastructure/db/driver.dart';
 
-class DriverMock implements Driver {
+class DriverMock extends Driver {
   final Map<String, String> data = {};
 
   @override

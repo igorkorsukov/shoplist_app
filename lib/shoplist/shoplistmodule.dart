@@ -1,7 +1,9 @@
 import '../infrastructure/modularity/modulesetup.dart';
 import '../infrastructure/modularity/ioc.dart';
-import 'services/shoplsitrepository.dart';
-import 'services/shoplistservice.dart';
+import 'internal/shoplsitrepository.dart';
+import 'internal/shoplistservice.dart';
+
+import 'ishoplistservice.dart';
 
 class ShopListModule extends ModuleSetup {
   final _repo = ShopListRepository();
@@ -13,7 +15,7 @@ class ShopListModule extends ModuleSetup {
   @override
   void registerExports() {
     ioc().reg<ShopListRepository>(_repo);
-    ioc().reg<ShopListService>(_serv);
+    ioc().reg<IShopListService>(_serv);
   }
 
   @override

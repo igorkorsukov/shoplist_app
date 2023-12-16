@@ -1,12 +1,12 @@
 import '../../infrastructure/uid/id.dart';
 import '../../infrastructure/subscription/channel.dart';
 import '../../infrastructure/modularity/inject.dart';
-import '../../infrastructure/modularity/injectable.dart';
 import '../../infrastructure/action/dispatcher.dart';
 import 'shoplsitrepository.dart';
-import 'shoplist.dart';
+import '../ishoplistservice.dart';
+import '../types.dart';
 
-class ShopListService with Injectable, Actionable {
+class ShopListService extends IShopListService with Actionable {
   final repo = Inject<ShopListRepository>();
   final dispatcher = Inject<ActionsDispatcher>();
 

@@ -7,9 +7,12 @@ import '../../infrastructure/subscription/channel.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/modularity/injectable.dart';
 import '../../infrastructure/modularity/inject.dart';
-import 'shoplist.dart';
+import '../types.dart';
 
 class ShopListRepository with Subscribable, Injectable {
+  @override
+  String interfaceId() => "IShopListRepository";
+
   final String serviceName = "shoplist";
   final store = Inject<LocalStorage>();
   final _listChanged = Channel2<Id, ShopList?>();

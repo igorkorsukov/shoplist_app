@@ -20,6 +20,9 @@ class _MergeResult {
 }
 
 class SyncService with Subscribable, Injectable {
+  @override
+  String interfaceId() => "ISyncService";
+
   final String serviceName = "sync";
   SyncStatus status = SyncStatus.notsynced;
   final statusChanged = Channel<SyncStatus>();

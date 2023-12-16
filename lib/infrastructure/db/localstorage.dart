@@ -8,8 +8,11 @@ import 'verstamp.dart';
 import 'storeobject.dart';
 
 class LocalStorage with Injectable {
+  @override
+  String interfaceId() => "ILocalStorage";
+
   bool _inited = false;
-  final Id _objID = Id("object_ids"); // ID of internal object
+  final Id _objID = const Id("object_ids"); // ID of internal object
   Set<Id> _objectIDs = {};
   final _objectChanged = Channel2<String, Id>();
   final driver = Inject<Driver>();

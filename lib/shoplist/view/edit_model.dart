@@ -7,11 +7,11 @@ import '../../infrastructure/uid/id.dart';
 import '../../infrastructure/uid/uidgen.dart';
 import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/action/dispatcher.dart';
-import '../services/shoplistservice.dart';
+import '../internal/shoplistservice.dart';
 
 class EditItemModel with Subscribable {
-  final Id referenceId = Id("reference");
-  Id editListId = Id("shoplist");
+  final Id referenceId = const Id("reference");
+  Id editListId = const Id("shoplist");
   Function? onChanged;
 
   final serv = Inject<ShopListService>();
@@ -101,7 +101,7 @@ class EditItemModel with Subscribable {
     _resort(_filtered);
 
     if (_searchString.isNotEmpty && needAddNew) {
-      _newItem = ShopItemV(Id(""), title: _searchString);
+      _newItem = ShopItemV(Id.invalid, title: _searchString);
       _filtered.add(_newItem!);
     }
 
