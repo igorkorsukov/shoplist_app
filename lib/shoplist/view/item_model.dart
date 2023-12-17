@@ -1,12 +1,10 @@
+import 'dart:ui';
 import '../../infrastructure/uid/uid.dart';
 
 class ShopItemV {
-  Uid id = Uid.invalid;
-  String title = "";
-  bool checked = false;
-  ShopItemV(this.id, {this.title = "", this.checked = false});
-
-  ShopItemV clone() {
-    return ShopItemV(id, title: title, checked: checked);
-  }
+  Uid id;
+  String title;
+  bool checked;
+  Color color;
+  ShopItemV(this.id, {required this.title, required this.checked, required this.color});
 }

@@ -1,39 +1,16 @@
 import '../../infrastructure/uid/uid.dart';
 import '../../infrastructure/subscription/channel.dart';
 import '../../infrastructure/modularity/inject.dart';
-import '../../infrastructure/action/dispatcher.dart';
 import 'shoplsitrepository.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
 
-class ShopListService extends IShopListService with Actionable {
+class ShopListService extends IShopListService {
   final repo = Inject<ShopListRepository>();
-  final dispatcher = Inject<ActionsDispatcher>();
 
   ShopListService();
 
-  void init() {
-    dispatcher().reg(this, "add_item", (Action act) {
-      addItem(act.args["listId"] as Uid,
-          ShopItem(act.args["itemId"] as Uid, title: act.args["title"], checked: act.args["checked"]));
-    });
-
-    dispatcher().reg(this, "remove_item", (Action act) {
-      removeItem(act.args["listId"] as Uid, act.args["itemId"] as Uid);
-    });
-
-    dispatcher().reg(this, "check_item", (Action act) {
-      checkItem(act.args["listId"] as Uid, act.args["itemId"] as Uid, act.args["val"] as bool);
-    });
-
-    dispatcher().reg(this, "remove_done", (Action act) {
-      removeDone(act.args["listId"] as Uid);
-    });
-
-    dispatcher().reg(this, "remove_all", (Action act) {
-      removeAll(act.args["listId"] as Uid);
-    });
-  }
+  void init() {}
 
   @override
   Channel2<Uid, ShopList> listChanged() => repo().listChanged();
@@ -83,6 +60,14 @@ class ShopListService extends IShopListService with Actionable {
   Future<void> removeItem(Uid listId, Uid itemId) async {
     ShopList list = await repo().readShopList(listId);
     list.items.removeWhere((e) => e.id == itemId);
+    repo().writeShopList(list);
+  }
+
+  @override
+  Future<void> changeItemCategory(Uid listId, Uid itemId, Uid categoryId) async {
+    ShopList list = await repo().readShopList(listId);
+    ShopItem item = list.items.firstWhere((e) => e.id == itemId);
+    item.categoryId = categoryId;
     repo().writeShopList(list);
   }
 

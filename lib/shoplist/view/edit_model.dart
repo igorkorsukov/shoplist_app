@@ -1,7 +1,6 @@
 import 'dart:developer';
+import 'dart:ui';
 import 'package:shoplist/shoplist/actions.dart';
-
-import 'item_model.dart';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/uid/uid.dart';
 import '../../infrastructure/uid/uidgen.dart';
@@ -9,6 +8,7 @@ import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/action/dispatcher.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
+import 'item_model.dart';
 
 class EditItemModel with Subscribable {
   final Uid referenceId = const Uid(LIST_ID_TYPE, "reference");
@@ -17,20 +17,25 @@ class EditItemModel with Subscribable {
 
   final serv = Inject<IShopListService>();
   final dispatcher = Inject<ActionsDispatcher>();
+  Categories _categories = {};
   final List<ShopItemV> _reference = [];
   final Set<Uid> _current = {};
   final List<ShopItemV> _filtered = [];
   String _searchString = "";
   ShopItemV? _newItem;
 
-  void _makeItems(list) {
+  void _makeItems(ShopList list) {
     _reference.clear();
     for (var it in list.items) {
-      _reference.add(ShopItemV(it.id, title: it.title, checked: it.checked));
+      Color c = CATEGORY_DEFAULT_COLOR;
+      if (_categories[it.categoryId] != null) {
+        c = _categories[it.categoryId]!.color;
+      }
+      _reference.add(ShopItemV(it.id, title: it.title, checked: it.checked, color: c));
     }
   }
 
-  void _makeCurrent(list) {
+  void _makeCurrent(ShopList list) {
     _current.clear();
     for (var i in list.items) {
       _current.add(i.id);
@@ -38,6 +43,8 @@ class EditItemModel with Subscribable {
   }
 
   void init() async {
+    _categories = await serv().categories();
+
     var list = await serv().shopList(referenceId);
     _makeItems(list);
 
@@ -100,7 +107,7 @@ class EditItemModel with Subscribable {
     _resort(_filtered);
 
     if (_searchString.isNotEmpty && needAddNew) {
-      _newItem = ShopItemV(Uid.invalid, title: _searchString);
+      _newItem = ShopItemV(Uid.invalid, title: _searchString, checked: false, color: const Color(0xFF000000));
       _filtered.add(_newItem!);
     }
 

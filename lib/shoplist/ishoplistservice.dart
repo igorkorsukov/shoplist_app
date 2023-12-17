@@ -15,13 +15,14 @@ abstract class IShopListService with Injectable {
   Future<void> addItem(Uid listId, ShopItem item);
   Future<void> checkItem(Uid listId, Uid itemId, bool val);
   Future<void> removeItem(Uid listId, Uid itemId);
+  Future<void> changeItemCategory(Uid listId, Uid itemId, Uid categoryId);
 
   Future<void> removeDone(Uid listId);
   Future<void> removeAll(Uid listId);
 
   // categories
-  Channel<Categories?> categoriesChanged();
+  Channel<Categories> categoriesChanged();
   Future<Categories> categories();
-  Future<void> addCategory(Category catg);
-  Future<void> removeCategory(Uid catgId);
+  Future<void> addCategory(Category cat);
+  Future<void> removeCategory(Uid catId);
 }

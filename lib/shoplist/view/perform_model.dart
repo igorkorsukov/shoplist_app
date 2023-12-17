@@ -20,11 +20,11 @@ class ShopListModel with Subscribable {
   void _makeItems(list) {
     _items.clear();
     for (var it in list.items) {
-      _items.add(ShopItemV(it.id, title: it.title, checked: it.checked));
+      _items.add(ShopItemV(it.id, title: it.title, checked: it.checked, color: CATEGORY_DEFAULT_COLOR));
     }
   }
 
-  void init() async {
+  Future<void> init() async {
     serv().shopList(listId).then((list) {
       _makeItems(list);
       _resort();

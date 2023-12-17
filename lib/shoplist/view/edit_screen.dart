@@ -3,9 +3,10 @@ import 'package:shoplist/shoplist/actions.dart';
 import '../../infrastructure/uid/uid.dart';
 import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/action/dispatcher.dart';
+import '../../sync/view/sync_button.dart';
 import 'edit_model.dart';
 import 'edit_item.dart';
-import '../../sync/view/sync_button.dart';
+import 'categories_popup.dart';
 
 class EditListScreen extends StatefulWidget {
   const EditListScreen({
@@ -78,6 +79,11 @@ class _AddItemScreen extends State<EditListScreen> {
               onCheckedChanged: (val) {
                 _model.changeItem(item, val!);
                 _searchController.clear();
+              },
+              onCategoryClicked: () {
+                selectCategory(context).then((Uid catId) {
+                  dispatcher().dispatch(setItemCategory(_model.referenceId, item.id, catId));
+                });
               },
               onDeleteClicked: () {
                 dispatcher().dispatch(removeItem(_model.referenceId, item.id));
