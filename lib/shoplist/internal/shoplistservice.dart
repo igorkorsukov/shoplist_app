@@ -36,7 +36,7 @@ class ShopListService extends IShopListService with Actionable {
   }
 
   @override
-  Channel2<Uid, ShopList?> listChanged() => repo().listChanged();
+  Channel2<Uid, ShopList> listChanged() => repo().listChanged();
 
   @override
   Future<ShopList> shopList(Uid listId) async {
@@ -88,22 +88,24 @@ class ShopListService extends IShopListService with Actionable {
 
   // categories
   @override
-  Channel<Categories?> categoriesChanged() {
-    return Channel<Categories?>();
-  }
+  Channel<Categories> categoriesChanged() => repo().categoriesChanged();
 
   @override
   Future<Categories> categories() async {
-    return Future.value(Categories());
+    return repo().readCategories();
   }
 
   @override
-  Future<void> addCategory(Category catg) async {
-    return Future.value();
+  Future<void> addCategory(Category cat) async {
+    Categories cats = await repo().readCategories();
+    cats[cat.id] = cat;
+    repo().writeCategories(cats);
   }
 
   @override
-  Future<void> removeCategory(Uid catgId) async {
-    return Future.value();
+  Future<void> removeCategory(Uid catId) async {
+    Categories cats = await repo().readCategories();
+    cats.remove(catId);
+    repo().writeCategories(cats);
   }
 }

@@ -44,14 +44,12 @@ class EditItemModel with Subscribable {
     list = await serv().shopList(editListId);
     _makeCurrent(list);
 
-    serv().listChanged().onReceive(this, (name, list) async {
-      if (name == referenceId) {
-        list = list ?? await serv().shopList(name);
+    serv().listChanged().onReceive(this, (Uid listId, ShopList list) async {
+      if (listId == referenceId) {
         _makeItems(list);
       }
 
-      if (name == editListId) {
-        list = list ?? await serv().shopList(name);
+      if (listId == editListId) {
         _makeCurrent(list);
       }
 

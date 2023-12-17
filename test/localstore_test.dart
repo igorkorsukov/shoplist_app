@@ -13,19 +13,19 @@ import 'mocks/driver_mock.dart';
 
 class ObjectChangedSubscribable with Subscribable {
   int triggered = 0;
-  String service = "";
-  Uid objectId = Uid.invalid;
+  String sender = "";
+  StoreObject object = StoreObject(Uid.invalid);
 
   void clear() {
     triggered = 0;
-    service = "";
-    objectId = Uid.invalid;
+    sender = "";
+    object = StoreObject(Uid.invalid);
   }
 
-  void onTriggered(String serv, Uid objId) {
+  void onTriggered(String sendr, StoreObject obj) {
     triggered += 1;
-    service = serv;
-    objectId = objId;
+    sender = sendr;
+    object = obj;
   }
 }
 
@@ -169,8 +169,8 @@ void main() {
       store.writeObject("test", obj);
       await waitAsync();
       expect(subsc.triggered, 1);
-      expect(subsc.service, "test");
-      expect(subsc.objectId, obj1);
+      expect(subsc.sender, "test");
+      expect(subsc.object.id, obj1);
     }
 
     // write object 1 again
@@ -179,8 +179,8 @@ void main() {
       store.writeObject("test", obj);
       await waitAsync();
       expect(subsc.triggered, 1);
-      expect(subsc.service, "test");
-      expect(subsc.objectId, obj1);
+      expect(subsc.sender, "test");
+      expect(subsc.object.id, obj1);
     }
   });
 }

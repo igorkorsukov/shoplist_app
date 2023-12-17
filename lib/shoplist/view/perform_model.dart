@@ -31,12 +31,11 @@ class ShopListModel with Subscribable {
       onChanged!();
     });
 
-    serv().listChanged().onReceive(this, (id, list) async {
+    serv().listChanged().onReceive(this, (Uid id, ShopList list) async {
       if (listId != id) {
         return;
       }
 
-      list = list ?? await serv().shopList(listId);
       _makeItems(list);
       _resort();
       onChanged!();

@@ -1,9 +1,9 @@
-import 'package:flutter/widgets.dart';
-
+import 'dart:ui';
 import '../infrastructure/uid/uid.dart';
 
 const String LIST_ID_TYPE = "list";
 const String CATEGORY_ID_TYPE = "category";
+const Color CATEGORY_DEFAULT_COLOR = Color(0xff607D8B);
 
 class ShopItem {
   Uid id = Uid.invalid;
@@ -15,20 +15,20 @@ class ShopItem {
 
 class ShopList {
   Uid id = Uid.invalid;
-  String name = "";
+  String title = "";
   String comment = "";
   List<ShopItem> items = [];
 
-  ShopList(this.id, {this.name = "", this.comment = ""});
+  ShopList(this.id, {this.title = "", this.comment = ""});
 
   ShopList.empty();
 }
 
 class Category {
-  Uid id = Uid.invalid;
-  String title = "";
-  Color? color;
-  Category(this.id, {this.title = "", this.color});
+  Uid id;
+  String title;
+  Color color;
+  Category(this.id, {this.title = "", this.color = CATEGORY_DEFAULT_COLOR});
 }
 
 typedef Categories = Map<Uid, Category>;

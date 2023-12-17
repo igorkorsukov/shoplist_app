@@ -14,13 +14,13 @@ class LocalStorage with Injectable {
   bool _inited = false;
   final Uid _objID = const Uid(STORE_ID_TYPE, "object_ids"); // ID of internal object
   Set<Uid> _objectIDs = {};
-  final _objectChanged = Channel2<String, Uid>();
+  final _objectChanged = Channel2<String, StoreObject>();
   final driver = Inject<Driver>();
   final verstamp = Inject<Verstamp>();
 
   LocalStorage();
 
-  Channel2<String /*service*/, Uid /*objID*/ > objectChanged() => _objectChanged;
+  Channel2<String /*sender*/, StoreObject> objectChanged() => _objectChanged;
 
   Future<void> init() async {
     if (_inited) {
@@ -150,7 +150,7 @@ class LocalStorage with Injectable {
     var jsn = mergedObj.toJson();
     var str = json.encode(jsn);
     var ret = driver().writeString(mergedObj.id.toString(), str);
-    _objectChanged.send(service, mergedObj.id);
+    _objectChanged.send(service, mergedObj);
     return ret;
   }
 }

@@ -8,7 +8,7 @@ abstract class IShopListService with Injectable {
   String interfaceId() => "IShopListService";
 
   // lists
-  Channel2<Uid, ShopList?> listChanged();
+  Channel2<Uid, ShopList> listChanged();
 
   Future<ShopList> shopList(Uid listId);
 
