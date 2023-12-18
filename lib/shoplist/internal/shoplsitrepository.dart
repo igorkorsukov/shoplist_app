@@ -1,5 +1,3 @@
-import 'package:shoplist/shoplist/internal/orm.dart';
-
 import '../../infrastructure/db/localstorage.dart';
 import '../../infrastructure/db/storeobject.dart';
 import '../../infrastructure/uid/uid.dart';
@@ -8,20 +6,19 @@ import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/modularity/injectable.dart';
 import '../../infrastructure/modularity/inject.dart';
 import '../types.dart';
+import 'orm.dart';
 
 class ShopListRepository with Subscribable, Injectable {
   @override
   String interfaceId() => "IShopListRepository";
 
   final store = Inject<LocalStorage>();
-  final _listChanged = Channel2<Uid, ShopList>();
+  final _referenceChanged = Channel<Reference>();
   final _categoriesChanged = Channel<Categories>();
+  final _performChanged = Channel<Perform>();
   bool _inited = false;
 
   ShopListRepository();
-
-  // list
-  Channel2<Uid, ShopList> listChanged() => _listChanged;
 
   Future<void> init() async {
     if (_inited) {
@@ -35,33 +32,38 @@ class ShopListRepository with Subscribable, Injectable {
       }
 
       switch (obj.id.type) {
-        case LIST_ID_TYPE:
-          _listChanged.send(obj.id, ShopList(obj.id).fromStoreObject(obj));
+        case REFERENCE_ID_TYPE:
+          _referenceChanged.send(Reference().fromStoreObject(obj));
           break;
         case CATEGORY_ID_TYPE:
           _categoriesChanged.send(Categories().fromStoreObject(obj));
+          break;
+        case PERFORM_ID_TYPE:
+          _performChanged.send(Perform(obj.id).fromStoreObject(obj));
           break;
       }
     });
   }
 
-  Future<ShopList> readShopList(Uid listId) async {
-    StoreObject? obj = store().readObject(listId);
+  // Reference
+  Channel<Reference> referenceChanged() => _referenceChanged;
+
+  Future<Reference> readReference() async {
+    StoreObject? obj = store().readObject(REFERENCE_OBJ_ID);
     if (obj == null) {
-      return ShopList.empty();
+      return Reference();
     }
-
-    ShopList list = ShopList(listId).fromStoreObject(obj);
-    return list;
+    Reference ref = Reference().fromStoreObject(obj);
+    return ref;
   }
 
-  Future<void> writeShopList(ShopList list) async {
-    StoreObject obj = list.toStoreObject();
+  Future<void> writeReference(Reference ref) async {
+    StoreObject obj = ref.toStoreObject();
     await store().writeObject(interfaceId(), obj);
-    _listChanged.send(list.id, list);
+    _referenceChanged.send(ref);
   }
 
-  // categories
+  // Categories
   Channel<Categories> categoriesChanged() => _categoriesChanged;
 
   Future<Categories> readCategories() async {
@@ -69,7 +71,6 @@ class ShopListRepository with Subscribable, Injectable {
     if (obj == null) {
       return Categories();
     }
-
     Categories categories = Categories().fromStoreObject(obj);
     return categories;
   }
@@ -78,5 +79,23 @@ class ShopListRepository with Subscribable, Injectable {
     StoreObject obj = categories.toStoreObject();
     await store().writeObject(interfaceId(), obj);
     _categoriesChanged.send(categories);
+  }
+
+  // Perform
+  Channel<Perform> performChanged() => _performChanged;
+
+  Future<Perform> readPerform(Uid listId) async {
+    StoreObject? obj = store().readObject(listId);
+    if (obj == null) {
+      return Perform(Uid.invalid);
+    }
+    Perform list = Perform(listId).fromStoreObject(obj);
+    return list;
+  }
+
+  Future<void> writePerform(Perform list) async {
+    StoreObject obj = list.toStoreObject();
+    await store().writeObject(interfaceId(), obj);
+    _performChanged.send(list);
   }
 }

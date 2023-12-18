@@ -16,6 +16,12 @@ class ActionsDispatcher with Injectable {
     _registrations.add(r);
   }
 
+  void regMap(Actionable client, Map<ActionCode, ActionCallBack> calls) {
+    calls.forEach((code, call) {
+      reg(client, code, call);
+    });
+  }
+
   void dispatch(Action action) {
     for (var r in _registrations) {
       if (r.code == action.code) {

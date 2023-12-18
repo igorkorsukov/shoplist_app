@@ -6,7 +6,6 @@ import '../../infrastructure/action/dispatcher.dart';
 import '../../sync/view/sync_button.dart';
 import '../../appshell/view/main_drawer.dart';
 import 'perform_model.dart';
-import 'perform_item.dart';
 
 class ShopListScreen extends StatefulWidget {
   const ShopListScreen({super.key});
@@ -38,14 +37,14 @@ class _ShopListState extends State<ShopListScreen> {
     switch (val) {
       case 'edit_items':
         Navigator.pushNamed(context, '/edititems', arguments: <String, dynamic>{
-          'listId': model.listId,
+          'listId': model.performId,
         });
         break;
       case 'remove_done':
-        dispatcher().dispatch(removeDoneAction(model.listId));
+        dispatcher().dispatch(RemovePerformDone(model.performId));
         break;
       case 'remove_all':
-        dispatcher().dispatch(removeAllAction(model.listId));
+        dispatcher().dispatch(RemovePerformAll(model.performId));
         break;
     }
   }
@@ -74,13 +73,54 @@ class _ShopListState extends State<ShopListScreen> {
           child: ListView(
         children: [
           for (var item in items)
-            ShopListItem(
-                item: item,
+            PerformTile(
+                title: item.title,
+                checked: item.checked,
                 onCheckedChanged: (val) {
-                  dispatcher().dispatch(checkItem(model.listId, item.id, val!));
+                  dispatcher().dispatch(CheckPerformItem(model.performId, item.id, val!));
                 }),
         ],
       )),
     );
+  }
+}
+
+class PerformTile extends StatelessWidget {
+  const PerformTile({
+    super.key,
+    required this.title,
+    required this.checked,
+    required this.onCheckedChanged,
+  });
+
+  final String title;
+  final bool checked;
+  final ValueChanged<bool?> onCheckedChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    // return CheckboxListTile(
+    //     controlAffinity: ListTileControlAffinity.leading,
+    //     title: Text(
+    //       item.title,
+    //       style: TextStyle(
+    //         decoration: item.checked ? TextDecoration.lineThrough : TextDecoration.none,
+    //       ),
+    //     ),
+    //     value: item.checked,
+    //     onChanged: (val) {
+    //       Future.delayed(const Duration(milliseconds: 250), () => onCheckedChanged(val));
+    //     });
+
+    return ListTile(
+        title: Text(
+          title,
+          style: TextStyle(
+            decoration: checked ? TextDecoration.lineThrough : TextDecoration.none,
+          ),
+        ),
+        onTap: () {
+          Future.delayed(const Duration(milliseconds: 250), () => onCheckedChanged(!checked));
+        });
   }
 }

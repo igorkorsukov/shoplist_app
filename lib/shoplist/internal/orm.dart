@@ -4,59 +4,49 @@ import 'package:shoplist/infrastructure/db/storeobject.dart';
 import 'package:shoplist/infrastructure/uid/uid.dart';
 import '../types.dart';
 
+const Uid REFERENCE_OBJ_ID = Uid(REFERENCE_ID_TYPE, "reference_obj");
 const Uid CATEGORIES_OBJ_ID = Uid(CATEGORY_ID_TYPE, "categories_obj");
 
-// list
-extension ShopItemOrm on ShopItem {
+// Reference
+extension ReferenceItemOrm on ReferenceItem {
   String toPayload() {
     Map<String, dynamic> jsn = {
       'categoryId': categoryId.toString(),
       'title': title,
-      'checked': checked,
     };
     return json.encode(jsn);
   }
 
-  ShopItem fromPayload(String payload) {
+  ReferenceItem fromPayload(String payload) {
     assert(id.isValid());
     var jsn = json.decode(payload) as Map<String, dynamic>;
     categoryId = Uid.fromString(jsn['categoryId'] as String);
     title = jsn['title'] as String;
-    checked = jsn['checked'] as bool;
     return this;
   }
 }
 
-extension ShopListOrm on ShopList {
+extension ReferenceOrm on Reference {
   StoreObject toStoreObject() {
-    StoreObject obj = StoreObject(id);
-    obj.add(StoreRecord(const Uid(STORE_ID_TYPE, "title"), type: 'title', payload: title));
-    obj.add(StoreRecord(const Uid(STORE_ID_TYPE, "comment"), type: 'comment', payload: comment));
-    for (var it in items) {
+    StoreObject obj = StoreObject(REFERENCE_OBJ_ID);
+    for (var it in items()) {
       obj.add(StoreRecord(it.id, type: 'item', payload: it.toPayload()));
     }
     return obj;
   }
 
-  ShopList fromStoreObject(StoreObject obj) {
-    assert(id.isValid());
+  Reference fromStoreObject(StoreObject obj) {
     for (var r in obj.records.values) {
       switch (r.type) {
-        case 'title':
-          title = r.payload;
-          break;
-        case 'comment':
-          comment = r.payload;
-          break;
         case 'item':
-          items.add(ShopItem(r.id).fromPayload(r.payload));
+          add(ReferenceItem(r.id).fromPayload(r.payload));
       }
     }
     return this;
   }
 }
 
-// categories
+// Categories
 extension CategoryOrm on Category {
   String toPayload() {
     Map<String, dynamic> jsn = {
@@ -69,18 +59,16 @@ extension CategoryOrm on Category {
   Category fromPayload(String payload) {
     assert(id.isValid());
     var jsn = json.decode(payload) as Map<String, dynamic>;
-    title = jsn['title'] as String;
-    color = Color(jsn['color'] as int);
-    return this;
+    return Category(id, title: jsn['title'] as String, color: Color(jsn['color'] as int));
   }
 }
 
 extension CategoriesOrm on Categories {
   StoreObject toStoreObject() {
     StoreObject obj = StoreObject(CATEGORIES_OBJ_ID);
-    forEach((key, cat) {
+    for (var cat in toList()) {
       obj.add(StoreRecord(cat.id, type: 'category', payload: cat.toPayload()));
-    });
+    }
     return obj;
   }
 
@@ -88,7 +76,52 @@ extension CategoriesOrm on Categories {
     for (var r in obj.records.values) {
       switch (r.type) {
         case 'category':
-          this[r.id] = Category(r.id).fromPayload(r.payload);
+          add(Category(r.id).fromPayload(r.payload));
+      }
+    }
+    return this;
+  }
+}
+
+// Perform
+extension PerformItemOrm on PerformItem {
+  String toPayload() {
+    Map<String, dynamic> jsn = {
+      'refId': refId.toString(),
+      'checked': checked,
+    };
+    return json.encode(jsn);
+  }
+
+  PerformItem fromPayload(String payload) {
+    assert(id.isValid());
+    var jsn = json.decode(payload) as Map<String, dynamic>;
+    refId = Uid.fromString(jsn['refId'] as String);
+    checked = jsn['checked'] as bool;
+    return this;
+  }
+}
+
+extension PerformeOrm on Perform {
+  StoreObject toStoreObject() {
+    StoreObject obj = StoreObject(id);
+    obj.add(StoreRecord(const Uid(PERFORM_ID_TYPE, "title"), type: 'title', payload: title));
+    obj.add(StoreRecord(const Uid(PERFORM_ID_TYPE, "comment"), type: 'comment', payload: title));
+    for (var it in items) {
+      obj.add(StoreRecord(it.id, type: 'item', payload: it.toPayload()));
+    }
+    return obj;
+  }
+
+  Perform fromStoreObject(StoreObject obj) {
+    for (var r in obj.records.values) {
+      switch (r.type) {
+        case 'title':
+          title = r.payload;
+        case 'comment':
+          comment = r.payload;
+        case 'item':
+          items.add(PerformItem(r.id, Uid.invalid).fromPayload(r.payload));
       }
     }
     return this;

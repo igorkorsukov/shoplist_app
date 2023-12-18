@@ -1,40 +1,51 @@
 import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/action/dispatcher.dart';
-import '../../infrastructure/uid/uid.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
+import '../actions.dart';
 
 class ShopListActionsController with Actionable {
   final dispatcher = Inject<ActionsDispatcher>();
   final serv = Inject<IShopListService>();
 
   void init() {
-    // Item
-    dispatcher().reg(this, "add_item", (Action act) {
-      serv().addItem(act.args["listId"] as Uid,
-          ShopItem(act.args["itemId"] as Uid, title: act.args["title"], checked: act.args["checked"]));
-    });
+    Map<ActionCode, ActionCallBack> calls = {
+      // Reference
+      "add_new_refitem": (Action a) {
+        var act = a as AddNewRefItem;
+        serv().addReferenceItem(ReferenceItem(act.refItemId, title: act.title));
+      },
+      "remove_refitem": (Action a) {
+        serv().removeRefItem((a as RemoveRefItem).refItemId);
+      },
+      "change_refitem_category": (Action a) {
+        var act = a as ChangeRefItemCategory;
+        serv().changeItemCategory(act.refItemId, act.categoryId);
+      },
 
-    dispatcher().reg(this, "remove_item", (Action act) {
-      serv().removeItem(act.args["listId"] as Uid, act.args["itemId"] as Uid);
-    });
+      // Perform
+      "add_performitem": (Action a) {
+        var act = a as AddPerformItem;
+        serv().addPerformItem(act.listId, PerformItem(act.itemId, act.refItemId));
+      },
+      "remove_performitem": (Action a) {
+        var act = a as RemovePerformItem;
+        serv().removePerformItem(act.listId, act.itemId);
+      },
+      "check_performitem": (Action a) {
+        var act = a as CheckPerformItem;
+        serv().checkPerformItem(act.listId, act.itemId, act.val);
+      },
+      "remove_performdone": (Action a) {
+        var act = a as RemovePerformDone;
+        serv().removePerformDone(act.listId);
+      },
+      "remove_performall": (Action a) {
+        var act = a as RemovePerformAll;
+        serv().removePerformAll(act.listId);
+      },
+    };
 
-    dispatcher().reg(this, "check_item", (Action act) {
-      serv().checkItem(act.args["listId"] as Uid, act.args["itemId"] as Uid, act.args["val"] as bool);
-    });
-
-    dispatcher().reg(this, "change_item_category", (Action act) {
-      serv().changeItemCategory(
-          act.args["listId"] as Uid, act.args["liitemIdstId"] as Uid, act.args["categoryId"] as Uid);
-    });
-
-    // List
-    dispatcher().reg(this, "remove_done", (Action act) {
-      serv().removeDone(act.args["listId"] as Uid);
-    });
-
-    dispatcher().reg(this, "remove_all", (Action act) {
-      serv().removeAll(act.args["listId"] as Uid);
-    });
+    dispatcher().regMap(this, calls);
   }
 }

@@ -1,44 +1,75 @@
 import 'dart:developer';
+import 'dart:ui';
 import '../../infrastructure/subscription/subscribable.dart';
 import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/uid/uid.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
-import 'item_model.dart';
+
+class ShopItem {
+  Uid id;
+  String title;
+  bool checked;
+  Color color;
+  ShopItem(this.id, {required this.title, required this.checked, required this.color});
+}
 
 class ShopListModel with Subscribable {
   Function? onChanged;
-  Uid listId = const Uid(LIST_ID_TYPE, "shoplist");
+  Uid performId = const Uid(PERFORM_ID_TYPE, "shoplist");
 
   final serv = Inject<IShopListService>();
-  final List<ShopItemV> _items = [];
+  Reference _reference = Reference();
+  Categories _categories = Categories();
+  Perform _perform = Perform(Uid.invalid);
+  final List<ShopItem> _items = [];
 
   ShopListModel({
     this.onChanged,
   });
 
-  void _makeItems(list) {
+  void _makeItems(Reference ref, Categories cats, Perform perf) {
     _items.clear();
-    for (var it in list.items) {
-      _items.add(ShopItemV(it.id, title: it.title, checked: it.checked, color: CATEGORY_DEFAULT_COLOR));
+    for (PerformItem it in perf.items) {
+      ReferenceItem? refItem = ref.item(it.refId);
+      if (refItem == null) {
+        log("not valid ref id: ${it.refId}");
+        continue;
+      }
+      Category cat = cats.category(refItem.categoryId);
+
+      _items.add(ShopItem(it.id, title: refItem.title, checked: it.checked, color: cat.color));
     }
+
+    _resort();
+    onChanged!();
   }
 
   Future<void> init() async {
-    serv().shopList(listId).then((list) {
-      _makeItems(list);
-      _resort();
-      onChanged!();
+    // load
+    _reference = await serv().reference();
+    _categories = await serv().categories();
+    _perform = await serv().perform(performId);
+
+    // update
+    _makeItems(_reference, _categories, _perform);
+
+    // subscribe
+    serv().referenceChanged().onReceive(this, (Reference ref) async {
+      _reference = ref;
+      _makeItems(_reference, _categories, _perform);
     });
 
-    serv().listChanged().onReceive(this, (Uid id, ShopList list) async {
-      if (listId != id) {
-        return;
-      }
+    serv().categoriesChanged().onReceive(this, (Categories cats) async {
+      _categories = cats;
+      _makeItems(_reference, _categories, _perform);
+    });
 
-      _makeItems(list);
-      _resort();
-      onChanged!();
+    serv().performChanged().onReceive(this, (Perform perf) async {
+      if (perf.id == performId) {
+        _perform = perf;
+        _makeItems(_reference, _categories, _perform);
+      }
     });
   }
 
@@ -55,7 +86,7 @@ class ShopListModel with Subscribable {
     });
   }
 
-  List<ShopItemV> items() {
+  List<ShopItem> items() {
     return _items;
   }
 }

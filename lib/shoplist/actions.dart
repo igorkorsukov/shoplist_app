@@ -1,19 +1,51 @@
 import '../infrastructure/action/action.dart';
 import '../infrastructure/uid/uid.dart';
 
-// Item
-Action addItem(Uid listId, Uid itemId, String title, [bool checked = false]) =>
-    makeAction("add_item", {"listId": listId, "itemId": itemId, "title": title, "checked": checked});
+// Reference
+class AddNewRefItem extends Action {
+  final Uid refItemId;
+  final String title;
+  AddNewRefItem(this.refItemId, this.title) : super("add_new_refitem");
+}
 
-Action removeItem(Uid listId, Uid itemId) => makeAction("remove_item", {"listId": listId, "itemId": itemId});
+class RemoveRefItem extends Action {
+  final Uid refItemId;
+  RemoveRefItem(this.refItemId) : super("remove_refitem");
+}
 
-Action checkItem(Uid listId, Uid itemId, bool val) =>
-    makeAction("check_item", {"listId": listId, "itemId": itemId, "val": val});
+class ChangeRefItemCategory extends Action {
+  final Uid refItemId;
+  final Uid categoryId;
+  ChangeRefItemCategory(this.refItemId, this.categoryId) : super("change_refitem_category");
+}
 
-Action setItemCategory(Uid listId, Uid itemId, Uid categoryId) =>
-    makeAction("change_item_category", {"listId": listId, "itemId": itemId, "categoryId": categoryId});
+// Perform
+class AddPerformItem extends Action {
+  final Uid listId;
+  final Uid itemId;
+  final Uid refItemId;
+  AddPerformItem(this.listId, this.itemId, this.refItemId) : super("add_performitem");
+}
 
-// List
-Action removeDoneAction(Uid listId) => makeAction("remove_done", {"listId": listId});
+class RemovePerformItem extends Action {
+  final Uid listId;
+  final Uid itemId;
+  RemovePerformItem(this.listId, this.itemId) : super("remove_performitem");
+}
 
-Action removeAllAction(Uid listId) => makeAction("remove_all", {"listId": listId});
+class CheckPerformItem extends Action {
+  final Uid listId;
+  final Uid itemId;
+  final bool val;
+  CheckPerformItem(this.listId, this.itemId, this.val) : super("check_performitem");
+}
+
+class RemovePerformDone extends Action {
+  final Uid listId;
+  RemovePerformDone(this.listId) : super("remove_performdone");
+}
+
+class RemovePerformAll extends Action {
+  final Uid listId;
+  RemovePerformAll(this.listId) : super("remove_performall");
+}

@@ -7,22 +7,26 @@ abstract class IShopListService with Injectable {
   @override
   String interfaceId() => "IShopListService";
 
-  // lists
-  Channel2<Uid, ShopList> listChanged();
+  // Reference
+  Channel<Reference> referenceChanged();
+  Future<Reference> reference();
+  Future<void> addReferenceItem(ReferenceItem item);
+  Future<void> changeItemCategory(Uid refItemId, Uid categoryId);
+  Future<void> removeRefItem(Uid refItemId);
 
-  Future<ShopList> shopList(Uid listId);
-
-  Future<void> addItem(Uid listId, ShopItem item);
-  Future<void> checkItem(Uid listId, Uid itemId, bool val);
-  Future<void> removeItem(Uid listId, Uid itemId);
-  Future<void> changeItemCategory(Uid listId, Uid itemId, Uid categoryId);
-
-  Future<void> removeDone(Uid listId);
-  Future<void> removeAll(Uid listId);
-
-  // categories
+  // Categories
   Channel<Categories> categoriesChanged();
   Future<Categories> categories();
   Future<void> addCategory(Category cat);
   Future<void> removeCategory(Uid catId);
+
+  // Perform
+  Channel<Perform> performChanged();
+  Future<Perform> perform(Uid listId);
+  Future<void> addPerformItem(Uid listId, PerformItem item);
+  Future<void> checkPerformItem(Uid listId, Uid itemId, bool val);
+  Future<void> removePerformItem(Uid listId, Uid itemId);
+
+  Future<void> removePerformDone(Uid listId);
+  Future<void> removePerformAll(Uid listId);
 }

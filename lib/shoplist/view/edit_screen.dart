@@ -5,7 +5,6 @@ import '../../infrastructure/modularity/inject.dart';
 import '../../infrastructure/action/dispatcher.dart';
 import '../../sync/view/sync_button.dart';
 import 'edit_model.dart';
-import 'edit_item.dart';
 import 'categories_popup.dart';
 
 class EditListScreen extends StatefulWidget {
@@ -36,7 +35,7 @@ class _AddItemScreen extends State<EditListScreen> {
       _model.search(_searchController.text);
     });
 
-    _model.editListId = widget.args!["listId"] as Uid;
+    _model.performId = widget.args!["listId"] as Uid;
     _model.init();
   }
 
@@ -44,6 +43,18 @@ class _AddItemScreen extends State<EditListScreen> {
   void dispose() {
     _model.deinit();
     super.dispose();
+  }
+
+  bool isNeedAddNew(items) {
+    if (_searchController.text.isEmpty) {
+      return false;
+    }
+
+    if (items.length == 1 && items[0].title.toLowerCase() == _searchController.text.toLowerCase()) {
+      return false;
+    }
+
+    return true;
   }
 
   @override
@@ -74,23 +85,109 @@ class _AddItemScreen extends State<EditListScreen> {
       body: ListView(
         children: [
           for (var item in items)
-            AddItem(
-              item: item,
+            EditTile(
+              title: item.title,
+              checked: item.checked,
               onCheckedChanged: (val) {
-                _model.changeItem(item, val!);
+                _model.checkPerformItem(item, val!);
                 _searchController.clear();
               },
               onCategoryClicked: () {
                 selectCategory(context).then((Uid catId) {
-                  dispatcher().dispatch(setItemCategory(_model.referenceId, item.id, catId));
+                  dispatcher().dispatch(ChangeRefItemCategory(item.refId, catId));
                 });
               },
               onDeleteClicked: () {
-                dispatcher().dispatch(removeItem(_model.referenceId, item.id));
+                dispatcher().dispatch(RemoveRefItem(item.refId));
               },
             ),
+
+          // add new
+          if (isNeedAddNew(items))
+            AddNewTile(
+              title: _searchController.text,
+              onCheckedChanged: (val) {
+                _model.addNewItem(_searchController.text);
+                _searchController.clear();
+              },
+            )
         ],
       ),
+    );
+  }
+}
+
+class EditTile extends StatelessWidget {
+  const EditTile(
+      {super.key,
+      required this.title,
+      required this.checked,
+      required this.onCheckedChanged,
+      required this.onCategoryClicked,
+      required this.onDeleteClicked});
+
+  final String title;
+  final bool checked;
+  final ValueChanged<bool?> onCheckedChanged;
+  final Function onCategoryClicked;
+  final Function onDeleteClicked;
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+      controlAffinity: ListTileControlAffinity.leading,
+      title: Text(title),
+      value: checked,
+      onChanged: (val) {
+        Future.delayed(const Duration(milliseconds: 250), () => onCheckedChanged(val));
+      },
+      secondary: PopupMenuButton(
+        itemBuilder: (context) {
+          return [
+            const PopupMenuItem(
+              value: 'category',
+              child: Text('Категория'),
+            ),
+            const PopupMenuItem(
+              value: 'delete',
+              child: Text('Удалить'),
+            )
+          ];
+        },
+        onSelected: (String value) {
+          switch (value) {
+            case 'category':
+              onCategoryClicked();
+              break;
+            case 'delete':
+              onDeleteClicked();
+              break;
+          }
+        },
+      ),
+    );
+  }
+}
+
+class AddNewTile extends StatelessWidget {
+  const AddNewTile({
+    super.key,
+    required this.title,
+    required this.onCheckedChanged,
+  });
+
+  final String title;
+  final ValueChanged<bool?> onCheckedChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+      controlAffinity: ListTileControlAffinity.leading,
+      title: Text(title),
+      value: false,
+      onChanged: (val) {
+        Future.delayed(const Duration(milliseconds: 250), () => onCheckedChanged(val));
+      },
     );
   }
 }
