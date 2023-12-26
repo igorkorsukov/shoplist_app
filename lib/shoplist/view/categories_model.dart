@@ -11,11 +11,6 @@ class CategoriesModel {
   Future<void> init() async {
     var cats = await serv().categories();
     _categories = cats.toList();
-
-    if (_categories.isEmpty) {
-      _categories = defaultCategories().toList();
-    }
-
     onChanged!();
   }
 

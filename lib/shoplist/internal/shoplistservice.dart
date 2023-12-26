@@ -48,7 +48,13 @@ class ShopListService extends IShopListService {
   Channel<Categories> categoriesChanged() => repo().categoriesChanged();
 
   @override
-  Future<Categories> categories() async => repo().readCategories();
+  Future<Categories> categories() async {
+    Categories cats = await repo().readCategories();
+    if (cats.isEmpty()) {
+      cats = defaultCategories();
+    }
+    return cats;
+  }
 
   @override
   Future<void> addCategory(Category cat) async {

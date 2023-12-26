@@ -76,6 +76,7 @@ class _ShopListState extends State<ShopListScreen> {
             PerformTile(
                 title: item.title,
                 checked: item.checked,
+                categoryColor: item.color,
                 onCheckedChanged: (val) {
                   dispatcher().dispatch(CheckPerformItem(model.performId, item.id, val!));
                 }),
@@ -90,11 +91,13 @@ class PerformTile extends StatelessWidget {
     super.key,
     required this.title,
     required this.checked,
+    required this.categoryColor,
     required this.onCheckedChanged,
   });
 
   final String title;
   final bool checked;
+  final Color categoryColor;
   final ValueChanged<bool?> onCheckedChanged;
 
   @override
@@ -113,6 +116,9 @@ class PerformTile extends StatelessWidget {
     //     });
 
     return ListTile(
+        shape: Border(
+          left: BorderSide(width: 10, color: categoryColor),
+        ),
         title: Text(
           title,
           style: TextStyle(

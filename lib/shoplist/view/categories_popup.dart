@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:shoplist/infrastructure/uid/uid.dart';
 import 'categories_model.dart';
@@ -17,9 +18,11 @@ Future<Uid> selectCategory(context) async {
 }
 
 class CategoryItem extends StatelessWidget {
-  const CategoryItem({super.key, required this.item, required this.onClicked});
+  const CategoryItem({super.key, required this.title, required this.color, this.size = 60, required this.onClicked});
 
-  final Category item;
+  final String title;
+  final Color color;
+  final double size;
   final Function onClicked;
 
   @override
@@ -29,9 +32,11 @@ class CategoryItem extends StatelessWidget {
         onClicked();
       },
       child: Container(
-        padding: const EdgeInsets.all(8),
-        color: item.color,
-        child: Text(item.title),
+        //padding: const EdgeInsets.all(8),
+        width: size,
+        height: size,
+        color: color,
+        child: Text(title),
       ),
     );
   }
@@ -86,29 +91,49 @@ class _CategoriesPopup extends State<CategoriesPopup> {
   Widget build(BuildContext context) {
     var items = _model.categories();
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)), //this right here
-      child: SizedBox(
-        height: 400,
-        width: 400,
-        child: GridView.extent(
-          primary: false,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)), //this right here
+        child: Padding(
           padding: const EdgeInsets.all(20),
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          maxCrossAxisExtent: 60,
-          children: <Widget>[
-            for (var item in items)
-              CategoryItem(
-                  item: item,
-                  onClicked: () {
-                    Navigator.pop(context, item.id);
-                  }),
-            CategoryItemNew(onClicked: () {
-              Navigator.pop(context, Uid("new", "new"));
-            })
-          ],
-        ),
-      ),
-    );
+          child: Align(
+            heightFactor: 1.0,
+            alignment: Alignment.topCenter,
+            child: Wrap(
+              spacing: 8.0, // gap between adjacent chips
+              runSpacing: 8.0, // gap between lines
+              children: <Widget>[
+                for (var item in items)
+                  CategoryItem(
+                      title: item.title,
+                      color: item.color,
+                      onClicked: () {
+                        Navigator.pop(context, item.id);
+                      }),
+              ],
+            ),
+          ),
+        )
+        // child: SizedBox(
+        //   height: 400 / screenSize.width * 154,
+        //   width: 400,
+        //   child: GridView.extent(
+        //     primary: false,
+        //     padding: const EdgeInsets.all(20),
+        //     crossAxisSpacing: 10,
+        //     mainAxisSpacing: 10,
+        //     maxCrossAxisExtent: 60,
+        //     children: <Widget>[
+        //       for (var item in items)
+        //         CategoryItem(
+        //             item: item,
+        //             onClicked: () {
+        //               Navigator.pop(context, item.id);
+        //             }),
+        //       // CategoryItemNew(onClicked: () {
+        //       //   Navigator.pop(context, Uid("new", "new"));
+        //       // })
+        //     ],
+        //   ),
+        // ),
+        );
   }
 }

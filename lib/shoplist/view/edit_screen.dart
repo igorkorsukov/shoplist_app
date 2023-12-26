@@ -88,6 +88,7 @@ class _AddItemScreen extends State<EditListScreen> {
             EditTile(
               title: item.title,
               checked: item.checked,
+              categoryColor: item.color,
               onCheckedChanged: (val) {
                 _model.checkPerformItem(item, val!);
                 _searchController.clear();
@@ -122,12 +123,14 @@ class EditTile extends StatelessWidget {
       {super.key,
       required this.title,
       required this.checked,
+      required this.categoryColor,
       required this.onCheckedChanged,
       required this.onCategoryClicked,
       required this.onDeleteClicked});
 
   final String title;
   final bool checked;
+  final Color categoryColor;
   final ValueChanged<bool?> onCheckedChanged;
   final Function onCategoryClicked;
   final Function onDeleteClicked;
@@ -136,6 +139,9 @@ class EditTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return CheckboxListTile(
       controlAffinity: ListTileControlAffinity.leading,
+      shape: Border(
+        left: BorderSide(width: 10, color: categoryColor),
+      ),
       title: Text(title),
       value: checked,
       onChanged: (val) {

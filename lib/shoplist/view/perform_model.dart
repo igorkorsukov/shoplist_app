@@ -81,6 +81,8 @@ class ShopListModel with Subscribable {
     _items.sort((a, b) {
       if (a.checked != b.checked) {
         return a.checked ? 1 : -1;
+      } else if (a.color != b.color) {
+        return a.color.value.compareTo(b.color.value);
       }
       return a.title.compareTo(b.title);
     });

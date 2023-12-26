@@ -88,8 +88,8 @@ class EditItemModel with Subscribable {
 
   void _resort(List<EditItem> l) {
     l.sort((a, b) {
-      if (a.checked != b.checked) {
-        return a.checked ? -1 : 1;
+      if (a.color != b.color) {
+        return a.color.value.compareTo(b.color.value);
       }
       return a.title.compareTo(b.title);
     });

@@ -75,6 +75,8 @@ class Categories {
     }
   }
 
+  bool isEmpty() => _cats.isEmpty;
+
   List<Category> toList() => _cats.values.toList();
 
   Category category(Uid categoryId) => _cats[categoryId] ?? DEFAULT_CATEGORY;
@@ -93,9 +95,15 @@ Categories defaultCategories() {
     Category(Uid(CATEGORY_ID_TYPE, "cat1"), color: Colors.pink),
     Category(Uid(CATEGORY_ID_TYPE, "cat2"), color: Colors.red),
     Category(Uid(CATEGORY_ID_TYPE, "cat3"), color: Colors.deepOrange),
-    Category(Uid(CATEGORY_ID_TYPE, "cat4"), color: Colors.lime),
-    Category(Uid(CATEGORY_ID_TYPE, "cat5"), color: Colors.lightGreen),
-    Category(Uid(CATEGORY_ID_TYPE, "cat6"), color: Colors.teal),
+    Category(Uid(CATEGORY_ID_TYPE, "cat4"), color: Colors.amber),
+    Category(Uid(CATEGORY_ID_TYPE, "cat5"), color: Colors.lime),
+    Category(Uid(CATEGORY_ID_TYPE, "cat6"), color: Colors.green),
+    Category(Uid(CATEGORY_ID_TYPE, "cat7"), color: Colors.teal),
+    Category(Uid(CATEGORY_ID_TYPE, "cat8"), color: Colors.cyan),
+    Category(Uid(CATEGORY_ID_TYPE, "cat9"), color: Colors.blue),
+    Category(Uid(CATEGORY_ID_TYPE, "cat10"), color: Colors.indigo),
+    Category(Uid(CATEGORY_ID_TYPE, "cat11"), color: Colors.purple),
+    Category(Uid(CATEGORY_ID_TYPE, "cat12"), color: Colors.brown),
   ];
 
   return Categories.fromList(list);
