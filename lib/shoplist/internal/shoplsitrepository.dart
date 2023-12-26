@@ -1,4 +1,4 @@
-import '../../infrastructure/db/localstorage.dart';
+import '../../infrastructure/db/objectsstore.dart';
 import '../../infrastructure/db/storeobject.dart';
 import '../../infrastructure/uid/uid.dart';
 import '../../infrastructure/subscription/channel.dart';
@@ -12,7 +12,7 @@ class ShopListRepository with Subscribable, Injectable {
   @override
   String interfaceId() => "IShopListRepository";
 
-  final store = Inject<LocalStorage>();
+  final store = Inject<ObjectsStore>();
   final _referenceChanged = Channel<Reference>();
   final _categoriesChanged = Channel<Categories>();
   final _performChanged = Channel<Perform>();
@@ -49,7 +49,7 @@ class ShopListRepository with Subscribable, Injectable {
   Channel<Reference> referenceChanged() => _referenceChanged;
 
   Future<Reference> readReference() async {
-    StoreObject? obj = store().readObject(REFERENCE_OBJ_ID);
+    StoreObject? obj = await store().readObject(REFERENCE_OBJ_ID);
     if (obj == null) {
       return Reference();
     }
@@ -67,7 +67,7 @@ class ShopListRepository with Subscribable, Injectable {
   Channel<Categories> categoriesChanged() => _categoriesChanged;
 
   Future<Categories> readCategories() async {
-    StoreObject? obj = store().readObject(CATEGORIES_OBJ_ID);
+    StoreObject? obj = await store().readObject(CATEGORIES_OBJ_ID);
     if (obj == null) {
       return Categories();
     }
@@ -85,7 +85,7 @@ class ShopListRepository with Subscribable, Injectable {
   Channel<Perform> performChanged() => _performChanged;
 
   Future<Perform> readPerform(Uid listId) async {
-    StoreObject? obj = store().readObject(listId);
+    StoreObject? obj = await store().readObject(listId);
     if (obj == null) {
       return Perform(Uid.invalid);
     }

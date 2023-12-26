@@ -1,4 +1,4 @@
-import 'package:shoplist/infrastructure/db/localstorage.dart';
+import 'package:shoplist/infrastructure/db/objectsstore.dart';
 import 'package:test/test.dart';
 
 import 'package:shoplist/infrastructure/db/syncservice.dart';
@@ -6,17 +6,17 @@ import 'package:shoplist/infrastructure/db/verstamp.dart';
 import 'package:shoplist/infrastructure/db/storeobject.dart';
 import 'package:shoplist/infrastructure/uid/uid.dart';
 
-import 'mocks/driver_mock.dart';
+import 'mocks/localstore_mock.dart';
 import 'mocks/cloudfs_mock.dart';
 
 class Client {
-  final driver = DriverMock();
+  final driver = LocalStoreMock();
 
-  final store = LocalStorage();
+  final store = ObjectsStore();
   final serv = SyncService();
 
   Future<void> setup(CloudFSMock cloud, Verstamp verstamp) async {
-    store.driver.set(driver);
+    store.localStore.set(driver);
     store.verstamp.set(verstamp);
     serv.store.set(store);
     serv.cloud.set(cloud);

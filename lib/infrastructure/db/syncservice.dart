@@ -8,7 +8,7 @@ import '../uid/uid.dart';
 import '../modularity/inject.dart';
 import '../modularity/injectable.dart';
 import 'cloudfs.dart';
-import 'localstorage.dart';
+import 'objectsstore.dart';
 import 'storeobject.dart';
 
 enum SyncStatus { notsynced, running, synced }
@@ -29,7 +29,7 @@ class SyncService with Subscribable, Injectable {
 
   bool _inited = false;
   final cloud = Inject<CloudFS>();
-  final store = Inject<LocalStorage>();
+  final store = Inject<ObjectsStore>();
 
   final Duration _interval = const Duration(seconds: 10);
   Timer? _timer;
@@ -89,14 +89,14 @@ class SyncService with Subscribable, Injectable {
     _setStatus(SyncStatus.running);
     _nextStatus = SyncStatus.synced;
 
-    Set<Uid> objectIDs = store().objectIDs();
+    Set<Uid> objectIDs = await store().objectIDs();
 
     try {
       assert(objectIDs.isNotEmpty);
 
       if (objectIDs.length == 1) {
         await _syncObject(objectIDs.first);
-        objectIDs = store().objectIDs();
+        objectIDs = await store().objectIDs();
       }
 
       for (var objId in objectIDs) {
@@ -123,7 +123,7 @@ class SyncService with Subscribable, Injectable {
     }
 
     // get local
-    StoreObject? localObj = store().readObject(objId, deleted: true);
+    StoreObject? localObj = await store().readObject(objId, deleted: true);
 
     // merge
     _MergeResult mr = _merge(localObj, remoteObj);
@@ -132,7 +132,7 @@ class SyncService with Subscribable, Injectable {
     }
 
     if (mr.isLocalChanged) {
-      store().writeObject(serviceName, mr.obj!);
+      await store().writeObject(serviceName, mr.obj!);
     }
 
     if (mr.isRemoteChanged) {

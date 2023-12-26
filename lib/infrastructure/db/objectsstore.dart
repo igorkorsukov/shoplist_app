@@ -3,22 +3,22 @@ import '../subscription/channel.dart';
 import '../uid/uid.dart';
 import '../modularity/injectable.dart';
 import '../modularity/inject.dart';
-import 'driver.dart';
+import 'ilocalstore.dart';
 import 'verstamp.dart';
 import 'storeobject.dart';
 
-class LocalStorage with Injectable {
+class ObjectsStore with Injectable {
   @override
-  String interfaceId() => "ILocalStorage";
+  String interfaceId() => "IObjectsStore";
 
   bool _inited = false;
   final Uid _objID = const Uid(STORE_ID_TYPE, "object_ids"); // ID of internal object
   Set<Uid> _objectIDs = {};
   final _objectChanged = Channel2<String, StoreObject>();
-  final driver = Inject<Driver>();
+  final localStore = Inject<ILocalStore>();
   final verstamp = Inject<Verstamp>();
 
-  LocalStorage();
+  ObjectsStore();
 
   Channel2<String /*sender*/, StoreObject> objectChanged() => _objectChanged;
 
@@ -30,10 +30,10 @@ class LocalStorage with Injectable {
     _inited = true;
   }
 
-  Future<bool> clear() => driver().clear();
+  Future<bool> clear() => localStore().clear();
 
-  Set<Uid> _readObjectIDs() {
-    var obj = readObject(_objID);
+  Future<Set<Uid>> _readObjectIDs() async {
+    var obj = await readObject(_objID);
     if (obj == null) {
       return {_objID};
     }
@@ -55,15 +55,15 @@ class LocalStorage with Injectable {
     writeObject("localstore", obj);
   }
 
-  Set<Uid> objectIDs() {
+  Future<Set<Uid>> objectIDs() async {
     if (_objectIDs.isEmpty) {
-      _objectIDs = _readObjectIDs();
+      _objectIDs = await _readObjectIDs();
     }
     return _objectIDs;
   }
 
-  StoreObject? readObject(Uid objId, {bool deleted = false}) {
-    String? raw = driver().readString(objId.toString());
+  Future<StoreObject?> readObject(Uid objId, {bool deleted = false}) async {
+    String? raw = await localStore().read(objId.toString());
     if (raw == null) {
       return null;
     }
@@ -71,12 +71,12 @@ class LocalStorage with Injectable {
     return StoreObject.fromJson(objId, jsn, deleted: deleted);
   }
 
-  Future<bool> writeObject(String service, StoreObject obj) {
+  Future<bool> writeObject(String service, StoreObject obj) async {
     // timestamp and deleted
     StoreObject mergedObj = StoreObject(obj.id);
     {
       var vs = verstamp().verstamp();
-      var currentObj = readObject(obj.id, deleted: true);
+      var currentObj = await readObject(obj.id, deleted: true);
 
       // new object
       if (currentObj == null) {
@@ -139,7 +139,7 @@ class LocalStorage with Injectable {
       if (mergedObj.id == _objID) {
         _objectIDs.clear();
       } else {
-        var ids = objectIDs();
+        var ids = await objectIDs();
         if (!ids.contains(mergedObj.id)) {
           ids.add(mergedObj.id);
           _writeObjectIDs(ids);
@@ -149,7 +149,7 @@ class LocalStorage with Injectable {
 
     var jsn = mergedObj.toJson();
     var str = json.encode(jsn);
-    var ret = driver().writeString(mergedObj.id.toString(), str);
+    var ret = await localStore().write(mergedObj.id.toString(), str);
     _objectChanged.send(service, mergedObj);
     return ret;
   }
