@@ -1,13 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../infrastructure/uid/uid.dart';
-
-const String REFERENCE_ID_TYPE = "reference";
-const String CATEGORY_ID_TYPE = "category";
-const String PERFORM_ID_TYPE = "perform";
+import '../warp/uid/uid.dart';
 
 const Color CATEGORY_DEFAULT_COLOR = Color(0xff607D8B);
-const Category DEFAULT_CATEGORY = Category(Uid(CATEGORY_ID_TYPE, "default_category"), color: CATEGORY_DEFAULT_COLOR);
+const Category DEFAULT_CATEGORY = Category(Uid("default_category"), color: CATEGORY_DEFAULT_COLOR);
 
 class ReferenceItem {
   Uid id = Uid.invalid;
@@ -48,12 +43,12 @@ class PerformItem {
 }
 
 class Perform {
-  Uid id = Uid.invalid;
+  String name;
   String title = "";
   String comment = "";
   List<PerformItem> items = [];
 
-  Perform(this.id, {this.title = "", this.comment = ""});
+  Perform(this.name, {this.title = "", this.comment = ""});
 
   PerformItem? item(Uid itemId) => items.firstWhere((e) => e.id == itemId);
 }
@@ -92,18 +87,18 @@ class Categories {
 
 Categories defaultCategories() {
   const List<Category> list = [
-    Category(Uid(CATEGORY_ID_TYPE, "cat1"), color: Colors.pink),
-    Category(Uid(CATEGORY_ID_TYPE, "cat2"), color: Colors.red),
-    Category(Uid(CATEGORY_ID_TYPE, "cat3"), color: Colors.deepOrange),
-    Category(Uid(CATEGORY_ID_TYPE, "cat4"), color: Colors.amber),
-    Category(Uid(CATEGORY_ID_TYPE, "cat5"), color: Colors.lime),
-    Category(Uid(CATEGORY_ID_TYPE, "cat6"), color: Colors.green),
-    Category(Uid(CATEGORY_ID_TYPE, "cat7"), color: Colors.teal),
-    Category(Uid(CATEGORY_ID_TYPE, "cat8"), color: Colors.cyan),
-    Category(Uid(CATEGORY_ID_TYPE, "cat9"), color: Colors.blue),
-    Category(Uid(CATEGORY_ID_TYPE, "cat10"), color: Colors.indigo),
-    Category(Uid(CATEGORY_ID_TYPE, "cat11"), color: Colors.purple),
-    Category(Uid(CATEGORY_ID_TYPE, "cat12"), color: Colors.brown),
+    Category(Uid("cat1"), color: Colors.pink),
+    Category(Uid("cat2"), color: Colors.red),
+    Category(Uid("cat3"), color: Colors.deepOrange),
+    Category(Uid("cat4"), color: Colors.amber),
+    Category(Uid("cat5"), color: Colors.lime),
+    Category(Uid("cat6"), color: Colors.green),
+    Category(Uid("cat7"), color: Colors.teal),
+    Category(Uid("cat8"), color: Colors.cyan),
+    Category(Uid("cat9"), color: Colors.blue),
+    Category(Uid("cat10"), color: Colors.indigo),
+    Category(Uid("cat11"), color: Colors.purple),
+    Category(Uid("cat12"), color: Colors.brown),
   ];
 
   return Categories.fromList(list);

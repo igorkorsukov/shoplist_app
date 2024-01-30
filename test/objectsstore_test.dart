@@ -1,65 +1,61 @@
 import 'package:test/test.dart';
-import 'package:shoplist/infrastructure/db/verstamp.dart';
-import 'package:shoplist/infrastructure/subscription/subscribable.dart';
+import 'package:shoplist/warp/db/internal/verstampservice.dart';
+import 'package:shoplist/warp/async/subscribable.dart';
+import 'package:shoplist/warp/uid/uid.dart';
 
-import 'package:shoplist/infrastructure/db/objectsstore.dart';
-import 'package:shoplist/infrastructure/db/storeobject.dart';
-import 'package:shoplist/infrastructure/uid/uid.dart';
+import 'package:shoplist/warp/db/internal/objectsstore.dart';
 
 import 'mocks/localstore_mock.dart';
+import 'mocks/verstampservice_mock.dart';
 
 // flutter test --coverage
 // genhtml -o ./coverage/report ./coverage/lcov.info
 
 class ObjectChangedSubscribable with Subscribable {
   int triggered = 0;
-  String sender = "";
-  StoreObject object = StoreObject(Uid.invalid);
+  StoreObject object = StoreObject("");
 
   void clear() {
     triggered = 0;
-    sender = "";
-    object = StoreObject(Uid.invalid);
+    object = StoreObject("");
   }
 
-  void onTriggered(String sendr, StoreObject obj) {
+  void onTriggered(StoreObject obj) {
     triggered += 1;
-    sender = sendr;
     object = obj;
   }
 }
 
 void main() {
-  final driver = LocalStoreMock();
-  final verstamp = Verstamp();
+  final localStore = LocalStoreMock();
+  final verstamp = VerstampServiceMock();
   final store = ObjectsStore();
 
   setUp(() async {
     verstamp.setMode(VerstampMode.fixed);
-    store.localStore.set(driver);
-    store.verstamp.set(verstamp);
-    await store.init();
+    store.localStore.set(localStore);
+    store.verstampService.set(verstamp);
   });
 
-  test('write / read object', () {
-    const Uid obj1 = Uid(STORE_ID_TYPE, "obj1");
-    const Uid id_1 = Uid(STORE_ID_TYPE, "id_1");
-    const Uid id_2 = Uid(STORE_ID_TYPE, "id_2");
-    const Uid id_3 = Uid(STORE_ID_TYPE, "id_3");
-    StoreObject obj = StoreObject(obj1);
+  test('write / read object', () async {
+    const String OBJ_1 = "obj1";
+    const Uid id_1 = Uid("id_1");
+    const Uid id_2 = Uid("id_2");
+    const Uid id_3 = Uid("id_3");
+    StoreObject obj = StoreObject(OBJ_1);
     obj.add(StoreRecord(id_1, type: "item", payload: "value1"));
     obj.records[id_2] = StoreRecord(id_2, type: "item", payload: "value2");
 
     // write object
     {
       verstamp.setValue(2);
-      store.writeObject("test", obj);
-      expect(driver.data.length, 2);
+      store.put(obj);
+      expect(localStore.data.length, 2);
     }
 
     // read object and check verstamps
     {
-      StoreObject? obj2 = store.readObject(obj1);
+      StoreObject? obj2 = await store.get(OBJ_1);
       expect(obj2, isNotNull);
       expect(obj2!.records[id_1]!.verstamp, equals(2));
       expect(obj2.records[id_2]!.verstamp, equals(2));
@@ -69,12 +65,12 @@ void main() {
     {
       obj.records[id_1]!.payload = "value1 changed";
       verstamp.setValue(3);
-      store.writeObject("test", obj);
+      await store.put(obj);
     }
 
     // read object and check new verstamp for changed record
     {
-      StoreObject? obj3 = store.readObject(obj1);
+      StoreObject? obj3 = await store.get(OBJ_1);
       expect(obj3, isNotNull);
       expect(obj3!.records[id_1]!.verstamp, equals(3));
       expect(obj3.records[id_2]!.verstamp, equals(2));
@@ -84,12 +80,12 @@ void main() {
     {
       obj.records.remove(id_1);
       verstamp.setValue(4);
-      store.writeObject("test", obj);
+      await store.put(obj);
     }
 
     // read object without removed record
     {
-      StoreObject? obj4 = store.readObject(obj1);
+      StoreObject? obj4 = await store.get(OBJ_1);
       expect(obj4, isNotNull);
       expect(obj4!.records[id_1], isNull);
       expect(obj4.records[id_2]!.verstamp, equals(2));
@@ -97,7 +93,7 @@ void main() {
 
     // read object with removed record
     {
-      StoreObject? obj5 = store.readObject(obj1, deleted: true);
+      StoreObject? obj5 = await store.get(OBJ_1, includeDeletedRecs: true);
       expect(obj5, isNotNull);
       expect(obj5!.records[id_1]!.verstamp, equals(4));
       expect(obj5.records[id_1]!.deleted, isTrue);
@@ -110,12 +106,12 @@ void main() {
     // write with record marked as deleted
     {
       verstamp.setValue(5);
-      store.writeObject("test", obj);
+      await store.put(obj);
     }
 
     // read object, should be same as obj5
     {
-      StoreObject? obj6 = store.readObject(obj1, deleted: true);
+      StoreObject? obj6 = await store.get(OBJ_1, includeDeletedRecs: true);
       expect(obj6, isNotNull);
       expect(obj6!.records[id_1]!.verstamp, equals(4));
       expect(obj6.records[id_1]!.deleted, isTrue);
@@ -126,31 +122,25 @@ void main() {
     {
       obj.records[id_3] = StoreRecord(id_3, type: "item", payload: "value3");
       verstamp.setValue(6);
-      store.writeObject("test", obj);
+      await store.put(obj);
     }
 
     // read object
     {
-      StoreObject? obj7 = store.readObject(obj1, deleted: true);
+      StoreObject? obj7 = await store.get(OBJ_1, includeDeletedRecs: true);
       expect(obj7, isNotNull);
       expect(obj7!.records[id_1]!.verstamp, equals(4));
       expect(obj7.records[id_1]!.deleted, isTrue);
       expect(obj7.records[id_2]!.verstamp, equals(2));
       expect(obj7.records[id_3]!.verstamp, equals(6));
     }
-
-    // clear
-    {
-      store.clear();
-      expect(driver.data.length, 0);
-    }
   });
 
   test('object changed notify', () async {
-    const Uid obj1 = Uid(STORE_ID_TYPE, "obj1");
-    const Uid id_1 = Uid(STORE_ID_TYPE, "id_1");
-    const Uid id_2 = Uid(STORE_ID_TYPE, "id_2");
-    StoreObject obj = StoreObject(obj1);
+    const String OBJ_1 = "obj1";
+    const Uid id_1 = Uid("id_1");
+    const Uid id_2 = Uid("id_2");
+    StoreObject obj = StoreObject(OBJ_1);
     obj.records[id_1] = StoreRecord(id_1, type: "item", payload: "value1");
     obj.records[id_2] = StoreRecord(id_2, type: "item", payload: "value2");
 
@@ -166,21 +156,19 @@ void main() {
     // write object 1
     {
       subsc.clear();
-      store.writeObject("test", obj);
+      await store.put(obj);
       await waitAsync();
       expect(subsc.triggered, 1);
-      expect(subsc.sender, "test");
-      expect(subsc.object.id, obj1);
+      expect(subsc.object.name, OBJ_1);
     }
 
     // write object 1 again
     {
       subsc.clear();
-      store.writeObject("test", obj);
+      await store.put(obj);
       await waitAsync();
       expect(subsc.triggered, 1);
-      expect(subsc.sender, "test");
-      expect(subsc.object.id, obj1);
+      expect(subsc.object.name, OBJ_1);
     }
   });
 }

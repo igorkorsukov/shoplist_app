@@ -1,6 +1,6 @@
-import '../../infrastructure/uid/uid.dart';
-import '../../infrastructure/subscription/channel.dart';
-import '../../infrastructure/modularity/inject.dart';
+import '../../warp/uid/uid.dart';
+import '../../warp/async/channel.dart';
+import '../../warp/modularity/inject.dart';
 import 'shoplsitrepository.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
@@ -75,43 +75,43 @@ class ShopListService extends IShopListService {
   Channel<Perform> performChanged() => repo().performChanged();
 
   @override
-  Future<Perform> perform(Uid listId) async => repo().readPerform(listId);
+  Future<Perform> perform(String name) async => repo().readPerform(name);
 
   @override
-  Future<void> addPerformItem(Uid listId, PerformItem item) async {
+  Future<void> addPerformItem(String name, PerformItem item) async {
     assert(item.id.isValid());
-    Perform list = await repo().readPerform(listId);
+    Perform list = await repo().readPerform(name);
     //! NOTE Id maybe not valid, if list not found
-    list.id = listId;
+    list.name = name;
     list.items.add(item);
     return repo().writePerform(list);
   }
 
   @override
-  Future<void> checkPerformItem(Uid listId, Uid itemId, bool val) async {
-    Perform list = await repo().readPerform(listId);
+  Future<void> checkPerformItem(String name, Uid itemId, bool val) async {
+    Perform list = await repo().readPerform(name);
     PerformItem item = list.items.firstWhere((e) => e.id == itemId);
     item.checked = val;
     return repo().writePerform(list);
   }
 
   @override
-  Future<void> removePerformItem(Uid listId, Uid itemId) async {
-    Perform list = await repo().readPerform(listId);
+  Future<void> removePerformItem(String name, Uid itemId) async {
+    Perform list = await repo().readPerform(name);
     list.items.removeWhere((e) => e.id == itemId);
     return repo().writePerform(list);
   }
 
   @override
-  Future<void> removePerformDone(Uid listId) async {
-    Perform list = await repo().readPerform(listId);
+  Future<void> removePerformDone(String name) async {
+    Perform list = await repo().readPerform(name);
     list.items.removeWhere((e) => e.checked == true);
     return repo().writePerform(list);
   }
 
   @override
-  Future<void> removePerformAll(Uid listId) async {
-    Perform list = await repo().readPerform(listId);
+  Future<void> removePerformAll(String name) async {
+    Perform list = await repo().readPerform(name);
     list.items.clear();
     return repo().writePerform(list);
   }

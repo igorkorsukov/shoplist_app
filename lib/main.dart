@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'infrastructure/modularity/modulesetup.dart';
-import 'infrastructure/infrastructuremodule.dart';
+import 'warp/modularity/modulesetup.dart';
+import 'warp/warpmodule.dart';
 import 'shoplist/shoplistmodule.dart';
 
 import 'shoplist/view/perform_screen.dart';

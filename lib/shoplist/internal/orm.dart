@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'package:shoplist/infrastructure/db/storeobject.dart';
-import 'package:shoplist/infrastructure/uid/uid.dart';
+import 'package:shoplist/warp/db/storeobject.dart';
+import 'package:shoplist/warp/uid/uid.dart';
 import '../types.dart';
 
-const Uid REFERENCE_OBJ_ID = Uid(REFERENCE_ID_TYPE, "reference_obj");
-const Uid CATEGORIES_OBJ_ID = Uid(CATEGORY_ID_TYPE, "categories_obj");
+const String REFERENCE_OBJ = "reference";
+const String CATEGORIES_OBJ = "categories";
+const String PERFORM_OBJ = "perform";
 
 // Reference
 extension ReferenceItemOrm on ReferenceItem {
@@ -28,19 +29,16 @@ extension ReferenceItemOrm on ReferenceItem {
 
 extension ReferenceOrm on Reference {
   StoreObject toStoreObject() {
-    StoreObject obj = StoreObject(REFERENCE_OBJ_ID);
+    StoreObject obj = StoreObject(REFERENCE_OBJ);
     for (var it in items()) {
-      obj.add(StoreRecord(it.id, type: 'item', payload: it.toPayload()));
+      obj.add(StoreRecord(it.id, payload: it.toPayload()));
     }
     return obj;
   }
 
   Reference fromStoreObject(StoreObject obj) {
     for (var r in obj.records.values) {
-      switch (r.type) {
-        case 'item':
-          add(ReferenceItem(r.id).fromPayload(r.payload));
-      }
+      add(ReferenceItem(r.id).fromPayload(r.payload));
     }
     return this;
   }
@@ -65,19 +63,16 @@ extension CategoryOrm on Category {
 
 extension CategoriesOrm on Categories {
   StoreObject toStoreObject() {
-    StoreObject obj = StoreObject(CATEGORIES_OBJ_ID);
+    StoreObject obj = StoreObject(CATEGORIES_OBJ);
     for (var cat in toList()) {
-      obj.add(StoreRecord(cat.id, type: 'category', payload: cat.toPayload()));
+      obj.add(StoreRecord(cat.id, payload: cat.toPayload()));
     }
     return obj;
   }
 
   Categories fromStoreObject(StoreObject obj) {
     for (var r in obj.records.values) {
-      switch (r.type) {
-        case 'category':
-          add(Category(r.id).fromPayload(r.payload));
-      }
+      add(Category(r.id).fromPayload(r.payload));
     }
     return this;
   }
@@ -104,9 +99,9 @@ extension PerformItemOrm on PerformItem {
 
 extension PerformeOrm on Perform {
   StoreObject toStoreObject() {
-    StoreObject obj = StoreObject(id);
-    obj.add(StoreRecord(const Uid(PERFORM_ID_TYPE, "title"), type: 'title', payload: title));
-    obj.add(StoreRecord(const Uid(PERFORM_ID_TYPE, "comment"), type: 'comment', payload: title));
+    StoreObject obj = StoreObject(PERFORM_OBJ);
+    obj.add(StoreRecord(const Uid("title"), type: 'title', payload: title));
+    obj.add(StoreRecord(const Uid("comment"), type: 'comment', payload: title));
     for (var it in items) {
       obj.add(StoreRecord(it.id, type: 'item', payload: it.toPayload()));
     }

@@ -1,11 +1,11 @@
 import 'dart:developer';
 import 'dart:ui';
 import 'package:shoplist/shoplist/actions.dart';
-import '../../infrastructure/subscription/subscribable.dart';
-import '../../infrastructure/uid/uid.dart';
-import '../../infrastructure/uid/uidgen.dart';
-import '../../infrastructure/modularity/inject.dart';
-import '../../infrastructure/action/dispatcher.dart';
+import '../../warp/async/subscribable.dart';
+import '../../warp/uid/uid.dart';
+import '../../warp/uid/uidgen.dart';
+import '../../warp/modularity/inject.dart';
+import '../../warp/action/dispatcher.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
 
@@ -19,14 +19,14 @@ class EditItem {
 }
 
 class EditItemModel with Subscribable {
-  Uid performId = Uid.invalid;
+  String performName = "";
   Function? onChanged;
 
   final serv = Inject<IShopListService>();
   final dispatcher = Inject<ActionsDispatcher>();
   Reference _reference = Reference();
   Categories _categories = Categories();
-  Perform _perform = Perform(Uid.invalid);
+  Perform _perform = Perform("");
   final List<EditItem> _items = [];
   final List<EditItem> _filtered = [];
   String _searchString = "";
@@ -50,7 +50,7 @@ class EditItemModel with Subscribable {
     // load
     _reference = await serv().reference();
     _categories = await serv().categories();
-    _perform = await serv().perform(performId);
+    _perform = await serv().perform(performName);
 
     // update
     _makeItems(_reference, _categories, _perform);
@@ -70,7 +70,7 @@ class EditItemModel with Subscribable {
     });
 
     serv().performChanged().onReceive(this, (Perform perf) async {
-      if (perf.id == performId) {
+      if (perf.name == performName) {
         _perform = perf;
         _makeItems(_reference, _categories, _perform);
         _update();
@@ -122,16 +122,16 @@ class EditItemModel with Subscribable {
 
   void checkPerformItem(EditItem item, bool isAdd) async {
     if (isAdd) {
-      dispatcher().dispatch(AddPerformItem(performId, UIDGen.newID(PERFORM_ID_TYPE), item.refId));
+      dispatcher().dispatch(AddPerformItem(performName, UIDGen.newID(), item.refId));
     } else {
       assert(item.performId!.isValid());
-      dispatcher().dispatch(RemovePerformItem(performId, item.performId!));
+      dispatcher().dispatch(RemovePerformItem(performName, item.performId!));
     }
   }
 
   void addNewItem(String title) async {
-    Uid refItemId = UIDGen.newID(REFERENCE_ID_TYPE);
+    Uid refItemId = UIDGen.newID();
     dispatcher().dispatch(AddNewRefItem(refItemId, title));
-    dispatcher().dispatch(AddPerformItem(performId, UIDGen.newID(PERFORM_ID_TYPE), refItemId));
+    dispatcher().dispatch(AddPerformItem(performName, UIDGen.newID(), refItemId));
   }
 }

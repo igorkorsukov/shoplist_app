@@ -1,14 +1,12 @@
 import 'package:collection/collection.dart';
-import '../uid/uid.dart';
-
-const STORE_ID_TYPE = "store";
+import 'package:shoplist/warp/uid/uid.dart';
 
 class StoreRecord {
-  int verstamp = 0;
   Uid id = Uid.invalid;
   String type = "";
-  String payload = "";
+  int verstamp = 0;
   bool deleted = false;
+  String payload = "";
 
   StoreRecord(this.id, {this.type = "", this.payload = "", this.deleted = false});
   StoreRecord.empty();
@@ -16,60 +14,54 @@ class StoreRecord {
   @override
   bool operator ==(Object other) {
     return other is StoreRecord &&
-        verstamp == other.verstamp &&
         id == other.id &&
         type == other.type &&
-        payload == other.payload &&
-        deleted == other.deleted;
+        verstamp == other.verstamp &&
+        deleted == other.deleted &&
+        payload == other.payload;
   }
 
   @override
-  int get hashCode => Object.hash(verstamp, id, type, payload, deleted);
+  int get hashCode => Object.hash(id, type, verstamp, deleted, payload);
 
   factory StoreRecord.fromJson(Map<String, dynamic> data) {
     StoreRecord r = StoreRecord.empty();
-    r.verstamp = data['verstamp'] as int;
-    r.type = data['type'] as String;
     r.id = Uid.fromString(data['id'] as String);
-    r.payload = data['payload'] as String;
+    r.type = data['type'] as String;
+    r.verstamp = data['verstamp'] as int;
     r.deleted = data['deleted'] as bool;
+    r.payload = data['payload'] as String;
     return r;
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'verstamp': verstamp,
-      'type': type,
-      'id': id.toString(),
-      'payload': payload,
-      'deleted': deleted,
-    };
+    return {'id': id.toString(), 'type': type, 'verstamp': verstamp, 'deleted': deleted, 'payload': payload};
   }
 }
 
 class StoreObject {
-  Uid id = Uid.invalid;
+  String name;
   Map<Uid, StoreRecord> records = {};
 
-  StoreObject(this.id);
+  StoreObject(this.name);
 
   @override
   bool operator ==(Object other) {
-    return other is StoreObject && id == other.id && const MapEquality().equals(records, other.records);
+    return other is StoreObject && name == other.name && const MapEquality().equals(records, other.records);
   }
 
   @override
-  int get hashCode => Object.hash(id.hashCode, const MapEquality().hash(records));
+  int get hashCode => Object.hash(name.hashCode, const MapEquality().hash(records));
 
   void add(StoreRecord r) {
     records[r.id] = r;
   }
 
-  factory StoreObject.fromJson(Uid objId, List<dynamic> records, {bool deleted = false}) {
-    StoreObject obj = StoreObject(objId);
+  factory StoreObject.fromJson(String name, List<dynamic> records, {bool includeDeletedRecs = false}) {
+    StoreObject obj = StoreObject(name);
     for (var rd in records) {
       var r = StoreRecord.fromJson(rd as Map<String, dynamic>);
-      if (!deleted && r.deleted) {
+      if (!includeDeletedRecs && r.deleted) {
         continue;
       }
       obj.records[r.id] = r;

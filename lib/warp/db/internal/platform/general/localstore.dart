@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../../../ilocalstore.dart';
 
+export '../../../ilocalstore.dart';
+
 class LocalStore extends ILocalStore {
   Directory _dir = Directory.systemTemp;
 
   LocalStore();
 
-  @override
   Future<void> init(String prefix) async {
     var docs = await getApplicationDocumentsDirectory();
     log("ApplicationDocumentsDirectory: ${docs.path}");
@@ -19,30 +20,20 @@ class LocalStore extends ILocalStore {
     }
   }
 
-  @override
   Future<bool> clear() async {
     await _dir.delete(recursive: true);
     return true;
   }
 
   @override
-  Future<List<String>> keys() async {
-    await for (var entity in _dir.list(recursive: true, followLinks: false)) {
-      print(entity.path);
-    }
-    return [];
-  }
-
-  @override
-  Future<bool> write(String key, String value) async {
-    log("write $key: $value");
+  Future<bool> put(String key, String value) async {
     var file = File('${_dir.path}/$key');
     file.writeAsStringSync(value, flush: true);
     return true;
   }
 
   @override
-  Future<String?> read(String key) async {
+  Future<String?> get(String key) async {
     var file = File('${_dir.path}/$key');
     bool exists = await file.exists();
     if (!exists) {
@@ -52,7 +43,7 @@ class LocalStore extends ILocalStore {
   }
 
   @override
-  Future<bool> remove(String key) async {
+  Future<bool> del(String key) async {
     var file = File('${_dir.path}/$key');
     bool exists = await file.exists();
     if (!exists) {

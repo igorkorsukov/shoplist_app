@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:shoplist/infrastructure/uid/uid.dart';
+import 'package:shoplist/warp/uid/uid.dart';
 import 'categories_model.dart';
 import '../types.dart';
 

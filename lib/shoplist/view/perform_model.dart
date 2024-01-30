@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'dart:ui';
-import '../../infrastructure/subscription/subscribable.dart';
-import '../../infrastructure/modularity/inject.dart';
-import '../../infrastructure/uid/uid.dart';
+import '../../warp/async/subscribable.dart';
+import '../../warp/modularity/inject.dart';
+import '../../warp/uid/uid.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
 
@@ -16,12 +16,12 @@ class ShopItem {
 
 class ShopListModel with Subscribable {
   Function? onChanged;
-  Uid performId = const Uid(PERFORM_ID_TYPE, "shoplist");
+  String performName = "shoplist";
 
   final serv = Inject<IShopListService>();
   Reference _reference = Reference();
   Categories _categories = Categories();
-  Perform _perform = Perform(Uid.invalid);
+  Perform _perform = Perform("");
   final List<ShopItem> _items = [];
 
   ShopListModel({
@@ -49,7 +49,7 @@ class ShopListModel with Subscribable {
     // load
     _reference = await serv().reference();
     _categories = await serv().categories();
-    _perform = await serv().perform(performId);
+    _perform = await serv().perform(performName);
 
     // update
     _makeItems(_reference, _categories, _perform);
@@ -66,7 +66,7 @@ class ShopListModel with Subscribable {
     });
 
     serv().performChanged().onReceive(this, (Perform perf) async {
-      if (perf.id == performId) {
+      if (perf.name == performName) {
         _perform = perf;
         _makeItems(_reference, _categories, _perform);
       }

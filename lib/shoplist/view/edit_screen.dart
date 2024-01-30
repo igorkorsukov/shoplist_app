@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shoplist/shoplist/actions.dart';
-import '../../infrastructure/uid/uid.dart';
-import '../../infrastructure/modularity/inject.dart';
-import '../../infrastructure/action/dispatcher.dart';
+import '../../warp/uid/uid.dart';
+import '../../warp/modularity/inject.dart';
+import '../../warp/action/dispatcher.dart';
 import '../../sync/view/sync_button.dart';
 import 'edit_model.dart';
 import 'categories_popup.dart';
@@ -35,7 +35,7 @@ class _AddItemScreen extends State<EditListScreen> {
       _model.search(_searchController.text);
     });
 
-    _model.performId = widget.args!["listId"] as Uid;
+    _model.performName = widget.args!["performName"] as String;
     _model.init();
   }
 

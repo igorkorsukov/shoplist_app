@@ -1,4 +1,4 @@
-import 'package:shoplist/infrastructure/modularity/inject.dart';
+import 'package:shoplist/warp/modularity/inject.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
 

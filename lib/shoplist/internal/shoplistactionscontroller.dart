@@ -1,5 +1,5 @@
-import '../../infrastructure/modularity/inject.dart';
-import '../../infrastructure/action/dispatcher.dart';
+import '../../warp/modularity/inject.dart';
+import '../../warp/action/dispatcher.dart';
 import '../ishoplistservice.dart';
 import '../types.dart';
 import '../actions.dart';
@@ -26,23 +26,23 @@ class ShopListActionsController with Actionable {
       // Perform
       "add_performitem": (Action a) {
         var act = a as AddPerformItem;
-        serv().addPerformItem(act.listId, PerformItem(act.itemId, act.refItemId));
+        serv().addPerformItem(act.listName, PerformItem(act.itemId, act.refItemId));
       },
       "remove_performitem": (Action a) {
         var act = a as RemovePerformItem;
-        serv().removePerformItem(act.listId, act.itemId);
+        serv().removePerformItem(act.listName, act.itemId);
       },
       "check_performitem": (Action a) {
         var act = a as CheckPerformItem;
-        serv().checkPerformItem(act.listId, act.itemId, act.val);
+        serv().checkPerformItem(act.listName, act.itemId, act.val);
       },
       "remove_performdone": (Action a) {
         var act = a as RemovePerformDone;
-        serv().removePerformDone(act.listId);
+        serv().removePerformDone(act.listName);
       },
       "remove_performall": (Action a) {
         var act = a as RemovePerformAll;
-        serv().removePerformAll(act.listId);
+        serv().removePerformAll(act.listName);
       },
     };
 

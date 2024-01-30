@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:shoplist/shoplist/actions.dart';
-import '../../infrastructure/modularity/inject.dart';
-import '../../infrastructure/action/dispatcher.dart';
+import '../../warp/modularity/inject.dart';
+import '../../warp/action/dispatcher.dart';
 import '../../sync/view/sync_button.dart';
 import '../../appshell/view/main_drawer.dart';
 import 'perform_model.dart';
@@ -37,14 +37,14 @@ class _ShopListState extends State<ShopListScreen> {
     switch (val) {
       case 'edit_items':
         Navigator.pushNamed(context, '/edititems', arguments: <String, dynamic>{
-          'listId': model.performId,
+          'performName': model.performName,
         });
         break;
       case 'remove_done':
-        dispatcher().dispatch(RemovePerformDone(model.performId));
+        dispatcher().dispatch(RemovePerformDone(model.performName));
         break;
       case 'remove_all':
-        dispatcher().dispatch(RemovePerformAll(model.performId));
+        dispatcher().dispatch(RemovePerformAll(model.performName));
         break;
     }
   }
@@ -78,7 +78,7 @@ class _ShopListState extends State<ShopListScreen> {
                 checked: item.checked,
                 categoryColor: item.color,
                 onCheckedChanged: (val) {
-                  dispatcher().dispatch(CheckPerformItem(model.performId, item.id, val!));
+                  dispatcher().dispatch(CheckPerformItem(model.performName, item.id, val!));
                 }),
         ],
       )),

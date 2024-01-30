@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shoplist/infrastructure/db/syncservice.dart';
 import 'sync_model.dart';
 
 class SyncButton extends StatefulWidget {

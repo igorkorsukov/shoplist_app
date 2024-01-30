@@ -1,10 +1,8 @@
-import '../../infrastructure/db/objectsstore.dart';
-import '../../infrastructure/db/storeobject.dart';
-import '../../infrastructure/uid/uid.dart';
-import '../../infrastructure/subscription/channel.dart';
-import '../../infrastructure/subscription/subscribable.dart';
-import '../../infrastructure/modularity/injectable.dart';
-import '../../infrastructure/modularity/inject.dart';
+import 'package:shoplist/warp/db/iobjectsstore.dart';
+import 'package:shoplist/warp/async/channel.dart';
+import 'package:shoplist/warp/async/subscribable.dart';
+import 'package:shoplist/warp/modularity/injectable.dart';
+import 'package:shoplist/warp/modularity/inject.dart';
 import '../types.dart';
 import 'orm.dart';
 
@@ -12,7 +10,7 @@ class ShopListRepository with Subscribable, Injectable {
   @override
   String interfaceId() => "IShopListRepository";
 
-  final store = Inject<ObjectsStore>();
+  final store = Inject<IObjectsStore>();
   final _referenceChanged = Channel<Reference>();
   final _categoriesChanged = Channel<Categories>();
   final _performChanged = Channel<Perform>();
@@ -26,20 +24,16 @@ class ShopListRepository with Subscribable, Injectable {
     }
     _inited = true;
 
-    store().objectChanged().onReceive(this, (String sender, StoreObject obj) {
-      if (interfaceId() == sender) {
-        return;
-      }
-
-      switch (obj.id.type) {
-        case REFERENCE_ID_TYPE:
+    store().objectChanged().onReceive(this, (StoreObject obj) {
+      switch (obj.name) {
+        case REFERENCE_OBJ:
           _referenceChanged.send(Reference().fromStoreObject(obj));
           break;
-        case CATEGORY_ID_TYPE:
+        case CATEGORIES_OBJ:
           _categoriesChanged.send(Categories().fromStoreObject(obj));
           break;
-        case PERFORM_ID_TYPE:
-          _performChanged.send(Perform(obj.id).fromStoreObject(obj));
+        case PERFORM_OBJ:
+          _performChanged.send(Perform(obj.name).fromStoreObject(obj));
           break;
       }
     });
@@ -49,7 +43,7 @@ class ShopListRepository with Subscribable, Injectable {
   Channel<Reference> referenceChanged() => _referenceChanged;
 
   Future<Reference> readReference() async {
-    StoreObject? obj = await store().readObject(REFERENCE_OBJ_ID);
+    StoreObject? obj = await store().get(REFERENCE_OBJ);
     if (obj == null) {
       return Reference();
     }
@@ -59,7 +53,7 @@ class ShopListRepository with Subscribable, Injectable {
 
   Future<void> writeReference(Reference ref) async {
     StoreObject obj = ref.toStoreObject();
-    await store().writeObject(interfaceId(), obj);
+    await store().put(obj);
     _referenceChanged.send(ref);
   }
 
@@ -67,7 +61,7 @@ class ShopListRepository with Subscribable, Injectable {
   Channel<Categories> categoriesChanged() => _categoriesChanged;
 
   Future<Categories> readCategories() async {
-    StoreObject? obj = await store().readObject(CATEGORIES_OBJ_ID);
+    StoreObject? obj = await store().get(CATEGORIES_OBJ);
     if (obj == null) {
       return Categories();
     }
@@ -77,25 +71,25 @@ class ShopListRepository with Subscribable, Injectable {
 
   Future<void> writeCategories(Categories categories) async {
     StoreObject obj = categories.toStoreObject();
-    await store().writeObject(interfaceId(), obj);
+    await store().put(obj);
     _categoriesChanged.send(categories);
   }
 
   // Perform
   Channel<Perform> performChanged() => _performChanged;
 
-  Future<Perform> readPerform(Uid listId) async {
-    StoreObject? obj = await store().readObject(listId);
+  Future<Perform> readPerform(String name) async {
+    StoreObject? obj = await store().get(name);
     if (obj == null) {
-      return Perform(Uid.invalid);
+      return Perform("");
     }
-    Perform list = Perform(listId).fromStoreObject(obj);
+    Perform list = Perform(name).fromStoreObject(obj);
     return list;
   }
 
   Future<void> writePerform(Perform list) async {
     StoreObject obj = list.toStoreObject();
-    await store().writeObject(interfaceId(), obj);
+    await store().put(obj);
     _performChanged.send(list);
   }
 }

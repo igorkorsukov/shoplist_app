@@ -1,18 +1,21 @@
-import '../../infrastructure/db/syncservice.dart';
-import '../../infrastructure/subscription/subscribable.dart';
-import '../../infrastructure/modularity/inject.dart';
+import 'package:shoplist/warp/modularity/inject.dart';
+import 'package:shoplist/warp/async/subscribable.dart';
+import 'package:shoplist/warp/db/isyncservice.dart';
+
+// export SyncStatus
+export 'package:shoplist/warp/db/isyncservice.dart';
 
 class SyncModel with Subscribable {
   Function(SyncStatus)? onStatusChanged;
 
-  final sync = Inject<SyncService>();
+  final sync = Inject<ISyncService>();
 
   SyncModel({
     this.onStatusChanged,
   });
 
   void init() async {
-    sync().statusChanged.onReceive(this, (v) {
+    sync().statusChanged().onReceive(this, (v) {
       onStatusChanged!(v);
     });
   }
@@ -21,9 +24,9 @@ class SyncModel with Subscribable {
     unsubscribe();
   }
 
-  SyncStatus status() => sync().status;
+  SyncStatus status() => sync().status();
 
   void startSync() {
-    sync().startSync();
+    sync().startPeriodicSync();
   }
 }

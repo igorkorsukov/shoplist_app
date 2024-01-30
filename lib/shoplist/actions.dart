@@ -1,5 +1,5 @@
-import '../infrastructure/action/action.dart';
-import '../infrastructure/uid/uid.dart';
+import '../warp/action/action.dart';
+import '../warp/uid/uid.dart';
 
 // Reference
 class AddNewRefItem extends Action {
@@ -21,31 +21,31 @@ class ChangeRefItemCategory extends Action {
 
 // Perform
 class AddPerformItem extends Action {
-  final Uid listId;
+  final String listName;
   final Uid itemId;
   final Uid refItemId;
-  AddPerformItem(this.listId, this.itemId, this.refItemId) : super("add_performitem");
+  AddPerformItem(this.listName, this.itemId, this.refItemId) : super("add_performitem");
 }
 
 class RemovePerformItem extends Action {
-  final Uid listId;
+  final String listName;
   final Uid itemId;
-  RemovePerformItem(this.listId, this.itemId) : super("remove_performitem");
+  RemovePerformItem(this.listName, this.itemId) : super("remove_performitem");
 }
 
 class CheckPerformItem extends Action {
-  final Uid listId;
+  final String listName;
   final Uid itemId;
   final bool val;
-  CheckPerformItem(this.listId, this.itemId, this.val) : super("check_performitem");
+  CheckPerformItem(this.listName, this.itemId, this.val) : super("check_performitem");
 }
 
 class RemovePerformDone extends Action {
-  final Uid listId;
-  RemovePerformDone(this.listId) : super("remove_performdone");
+  final String listName;
+  RemovePerformDone(this.listName) : super("remove_performdone");
 }
 
 class RemovePerformAll extends Action {
-  final Uid listId;
-  RemovePerformAll(this.listId) : super("remove_performall");
+  final String listName;
+  RemovePerformAll(this.listName) : super("remove_performall");
 }

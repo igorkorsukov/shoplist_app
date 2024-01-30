@@ -2,16 +2,16 @@ import 'dart:developer';
 import 'dart:convert';
 import 'dart:async';
 
-import '../subscription/subscribable.dart';
-import '../subscription/channel.dart';
-import '../uid/uid.dart';
-import '../modularity/inject.dart';
-import '../modularity/injectable.dart';
-import 'cloudfs.dart';
-import 'objectsstore.dart';
-import 'storeobject.dart';
+import 'package:shoplist/warp/async/subscribable.dart';
+import 'package:shoplist/warp/async/channel.dart';
+import 'package:shoplist/warp/uid/uid.dart';
+import 'package:shoplist/warp/modularity/inject.dart';
 
-enum SyncStatus { notsynced, running, synced }
+import '../isyncservice.dart';
+import '../icloudstore.dart';
+import '../iobjectsstore.dart';
+
+export '../isyncservice.dart';
 
 class _MergeResult {
   StoreObject? obj;
@@ -19,17 +19,13 @@ class _MergeResult {
   bool isLocalChanged = false;
 }
 
-class SyncService with Subscribable, Injectable {
-  @override
-  String interfaceId() => "ISyncService";
-
-  final String serviceName = "sync";
-  SyncStatus status = SyncStatus.notsynced;
-  final statusChanged = Channel<SyncStatus>();
+class SyncService extends ISyncService with Subscribable {
+  final cloud = Inject<ICloudStore>();
+  final store = Inject<IObjectsStore>();
 
   bool _inited = false;
-  final cloud = Inject<CloudFS>();
-  final store = Inject<ObjectsStore>();
+  SyncStatus _status = SyncStatus.notsynced;
+  final _statusChanged = Channel<SyncStatus>();
 
   final Duration _interval = const Duration(seconds: 10);
   Timer? _timer;
@@ -42,34 +38,31 @@ class SyncService with Subscribable, Injectable {
       return;
     }
 
-    store().objectChanged().onReceive(this, (service, name) {
-      if (serviceName == service) {
-        return;
-      }
-
-      if (status == SyncStatus.running) {
+    store().objectChanged().onReceive(this, (StoreObject obj) {
+      if (_status == SyncStatus.running) {
         _nextStatus = SyncStatus.notsynced;
       } else {
         _setStatus(SyncStatus.notsynced);
       }
     });
 
-    try {
-      await cloud().makeDir('app:/shoplist');
-    } catch (e) {
-      log("[Sync] init: $e");
-    }
-
     _inited = true;
   }
 
+  @override
+  SyncStatus status() => _status;
+
+  @override
+  Channel<SyncStatus> statusChanged() => _statusChanged;
+
   void _setStatus(SyncStatus s) {
-    status = s;
-    statusChanged.send(s);
+    _status = s;
+    _statusChanged.send(s);
   }
 
-  void startSync() async {
-    if (status == SyncStatus.running) {
+  @override
+  Future<void> startPeriodicSync() async {
+    if (_status == SyncStatus.running) {
       return;
     }
 
@@ -77,13 +70,15 @@ class SyncService with Subscribable, Injectable {
 
     await sync();
 
-    _timer = Timer(_interval, startSync);
+    _timer = Timer(_interval, startPeriodicSync);
   }
 
-  void stopSync() {
+  @override
+  void stopPeriodicSync() {
     _timer?.cancel();
   }
 
+  @override
   Future<void> sync() async {
     log("[Sync] try sync...");
     _setStatus(SyncStatus.running);
@@ -112,18 +107,18 @@ class SyncService with Subscribable, Injectable {
     log("[Sync] sync finished");
   }
 
-  Future<void> _syncObject(Uid objId) async {
+  Future<void> _syncObject(String name) async {
     // get remote object
     StoreObject? remoteObj;
-    var bytes = await cloud().readFile('app:/shoplist/$objId.json', maybeNotExists: true);
+    var bytes = await cloud().get('$name.json', maybeNotExists: true);
     if (bytes.isNotEmpty) {
       var str = utf8.decode(bytes);
       var jsn = json.decode(str);
-      remoteObj = StoreObject.fromJson(objId, jsn, deleted: true);
+      remoteObj = StoreObject.fromJson(name, jsn, includeDeletedRecs: true);
     }
 
     // get local
-    StoreObject? localObj = await store().readObject(objId, deleted: true);
+    StoreObject? localObj = await store().get(name, includeDeletedRecs: true);
 
     // merge
     _MergeResult mr = _merge(localObj, remoteObj);
@@ -132,14 +127,14 @@ class SyncService with Subscribable, Injectable {
     }
 
     if (mr.isLocalChanged) {
-      await store().writeObject(serviceName, mr.obj!);
+      await store().put(mr.obj!);
     }
 
     if (mr.isRemoteChanged) {
       var jsn = mr.obj!.toJson();
       var str = json.encode(jsn);
       bytes = utf8.encode(str);
-      await cloud().writeFile('app:/shoplist/$objId.json', bytes, overwrite: true);
+      await cloud().put('$name.json', bytes, overwrite: true);
     }
   }
 
@@ -157,10 +152,10 @@ class SyncService with Subscribable, Injectable {
       return res;
     }
 
-    assert(localObj.id == remoteObj.id);
+    assert(localObj.name == remoteObj.name);
 
     // actual merge
-    res.obj = StoreObject(localObj.id);
+    res.obj = StoreObject(localObj.name);
 
     Set<Uid> unitedIDs = localObj.records.keys.toSet();
     unitedIDs.addAll(remoteObj.records.keys);

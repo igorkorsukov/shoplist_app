@@ -1,5 +1,5 @@
-import '../infrastructure/modularity/modulesetup.dart';
-import '../infrastructure/modularity/ioc.dart';
+import '../warp/modularity/modulesetup.dart';
+import '../warp/modularity/ioc.dart';
 import 'internal/shoplsitrepository.dart';
 import 'internal/shoplistservice.dart';
 import 'internal/shoplistactionscontroller.dart';
